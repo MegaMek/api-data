@@ -3,7 +3,7 @@ import Vapor
 
 final class Todo: Model, Content {
     static let schema = "todos"
-    
+
     @ID(key: .id)
     var id: UUID?
 
