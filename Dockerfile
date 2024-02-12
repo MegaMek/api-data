@@ -1,7 +1,7 @@
 # ================================
 # Build image
 # ================================
-FROM swift:5.9-jammy as build
+FROM --platform=linux/amd64 swift:5.9-jammy as build
 
 # Install OS updates
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
@@ -49,7 +49,7 @@ RUN [ -d /build/Resources ] && { mv /build/Resources ./Resources && chmod -R a-w
 # ================================
 # Run image
 # ================================
-FROM ubuntu:jammy
+FROM --platform=linux/amd64  ubuntu:jammy
 
 # Make sure all system packages are up to date, and install only essential packages.
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
@@ -59,10 +59,8 @@ RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
   libjemalloc2 \
   ca-certificates \
   tzdata \
-  # If your app or its dependencies import FoundationNetworking, also install `libcurl4`.
-  # libcurl4 \
-  # If your app or its dependencies import FoundationXML, also install `libxml2`.
-  # libxml2 \
+  libcurl4 \
+  libxml2 \
   && rm -r /var/lib/apt/lists/*
 
 # Create a vapor user and group with /app as its home directory
