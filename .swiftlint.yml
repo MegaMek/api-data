@@ -1,0 +1,10 @@
+excluded:
+  - .build
+  - .gitlab
+  - .swiftpm
+  - coverage
+  - changelog
+  - ansible
+  - scripts
+identifier_name:
+  min_length: 2

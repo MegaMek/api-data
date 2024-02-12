@@ -1,0 +1,97 @@
+---
+- name: FASA API Provisioning And Deployment
+  hosts: "staging"
+  user: deploy
+  serial: 1
+
+  vars:
+    server_name: "api.fasa.games"
+    cert_name: "fasa.games"
+    username: "{{ lookup('file', './templates/username') }}"
+    password: "{{ lookup('file', './templates/password') }}"
+    database_host: "{{ lookup('file', './templates/database_host') }}"
+    database_name: "{{ lookup('file', './templates/database_name') }}"
+    database_password: "{{ lookup('file', './templates/database_password') }}"
+    database_username: "{{ lookup('file', './templates/database_username') }}"
+    sendgrid_api_key: "{{ lookup('file', './templates/sendgrid') }}"
+
+  tasks:
+    - name: Install Docker
+      apt:
+        pkg:
+          [
+            "docker-ce",
+            "python3-pip"
+          ]
+        state: present
+        update_cache: yes
+      become: true
+
+    - name: Install Docker Python Module
+      shell: "pip3 install docker"
+
+    - name: Log into private registry and force re-authorization
+      community.docker.docker_login:
+        registry_url: registry.tapenvy.us:443
+        username: "{{ username }}"
+        password: "{{ password }}"
+        reauthorize: true
+
+    - name: Migrate DB
+      community.docker.docker_container:
+        name: central-api
+        image: registry.tapenvy.us:443/fasa-games/central-api-service/main:latest
+        command:
+        pull: true
+        ports:
+        - "8080:8080"
+        env:
+          DATABASE_HOST: "{{ database_host }}"
+          DATABASE_USERNAME: "{{ database_username }}"
+          DATABASE_PASSWORD: "{{ database_password }}"
+          DATABASE_NAME: "{{ database_name }}"
+          SENDGRID_API_KEY: "{{ sendgrid_api_key }}"
+
+    - name: Start Container
+      community.docker.docker_container:
+        name: central-api
+        image: registry.tapenvy.us:443/fasa-games/central-api-service/main:latest
+        state: started
+        restart: true
+        restart_policy: unless-stopped
+        pull: true
+        ports:
+        - "8080:8080"
+        env:
+          DATABASE_HOST: "{{ database_host }}"
+          DATABASE_USERNAME: "{{ database_username }}"
+          DATABASE_PASSWORD: "{{ database_password }}"
+          DATABASE_NAME: "{{ database_name }}"
+          SENDGRID_API_KEY: "{{ sendgrid_api_key }}"
+
+    - name: Log out of Registry
+      community.docker.docker_login:
+        registry_url: registry.tapenvy.us:443
+        state: absent
+
+    - name: Copy Nginx conf
+      template:
+        src: templates/central-api.j2
+        dest: /etc/nginx/sites-available/central-api
+        mode: '0400'
+      become: true
+
+    - name: Enable Site config
+      file:
+        src: /etc/nginx/sites-available/central-api
+        dest: /etc/nginx/sites-enabled/central-api
+        state: link
+      become: true
+      notify: reload nginx
+
+  handlers:
+    - name: reload nginx
+      service:
+        name: nginx
+        state: restarted
+      become: true

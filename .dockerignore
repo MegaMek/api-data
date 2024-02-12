@@ -1,2 +1,9 @@
-.build/
-.swiftpm/
+.build
+.env
+.env*
+.git
+.git*
+.swiftpm
+.vscode
+ansible
+ansible*
