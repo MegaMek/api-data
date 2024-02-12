@@ -1,5 +1,5 @@
 [prod]
-web ansible_host=api.megamek.online
+web ansible_host=api.battletech.games
 
 [staging]
-web_staging ansible_host=api.battletech.dev ansible_sudo_pass='asdf;lkj'
+web_staging ansible_host=api.battletech.dev

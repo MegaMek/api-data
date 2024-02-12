@@ -86,7 +86,7 @@ production:
     - ansible-playbook ansible/production.yml
   environment:
     name: production
-    url: https://api.megamek.online
+    url: https://api.battletech.games
   rules:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
       when: manual
