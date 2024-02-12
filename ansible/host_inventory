@@ -1,0 +1,5 @@
+[prod]
+web ansible_host=api.battletech.games
+
+[staging]
+web_staging ansible_host=api.battletech.dev

@@ -1,0 +1,106 @@
+---
+- name: Battletech API sourced via MegaMek
+  hosts: "prod"
+  user: deploy
+  serial: 1
+
+  vars:
+    server_name: "api.quartermaster-command.services"
+    proxy_server: "quartermaster-command-services"
+    proxy_server_url: "localhost:8080"
+    cert_name: "quartermaster-command.services"
+    docker_image: "main"
+    docker_url: registry.tapenvy.us:443/open-source/megamek/mul-api/{{ docker_image }}:latest
+    username: "{{ lookup('file', './templates/username') }}"
+    password: "{{ lookup('file', './templates/password') }}"
+    database_host: "{{ lookup('file', './templates/database_host') }}"
+    database_name: "{{ lookup('file', './templates/database_name') }}"
+    database_password: "{{ lookup('file', './templates/database_password') }}"
+    database_username: "{{ lookup('file', './templates/database_username') }}"
+    sendgrid_api_key: "{{ lookup('file', './templates/sendgrid') }}"
+
+  tasks:
+    - name: Install Docker
+      ansible.builtin.apt:
+        pkg: ["docker-ce", "python3-pip"]
+        state: present
+        update_cache: true
+      become: true
+
+    - name: Install Docker Python Module
+      ansible.builtin.pip:
+        name: "docker"
+
+    - name: Prune everything (including non-dangling images)
+      community.docker.docker_prune:
+        containers: true
+        images: true
+        images_filters:
+          dangling: true
+        networks: true
+        volumes: true
+        builder_cache: true
+
+    - name: Log into private registry and force re-authorization
+      community.docker.docker_login:
+        registry_url: registry.tapenvy.us:443
+        username: "{{ username }}"
+        password: "{{ password }}"
+        reauthorize: true
+
+    - name: Migrate DB
+      community.docker.docker_container:
+        name: battletech-api-migrate
+        image: "{{ docker_url }}"
+        command: migrate -y
+        pull: true
+        env:
+          DATABASE_HOST: "{{ database_host }}"
+          DATABASE_USERNAME: "{{ database_username }}"
+          DATABASE_PASSWORD: "{{ database_password }}"
+          DATABASE_NAME: "{{ database_name }}"
+          SENDGRID_API_KEY: "{{ sendgrid_api_key }}"
+
+    - name: Start Container
+      community.docker.docker_container:
+        name: battletech-api
+        image: "{{ docker_url }}"
+        state: started
+        restart: true
+        restart_policy: unless-stopped
+        pull: true
+        ports:
+          - "8080:8080"
+        env:
+          DATABASE_HOST: "{{ database_host }}"
+          DATABASE_USERNAME: "{{ database_username }}"
+          DATABASE_PASSWORD: "{{ database_password }}"
+          DATABASE_NAME: "{{ database_name }}"
+          SENDGRID_API_KEY: "{{ sendgrid_api_key }}"
+
+    - name: Log out of Registry
+      community.docker.docker_login:
+        registry_url: registry.tapenvy.us:443
+        state: absent
+
+    - name: Copy Nginx conf
+      ansible.builtin.template:
+        src: templates/mm-api.j2
+        dest: /etc/nginx/sites-available/mm-api
+        mode: "0400"
+      become: true
+
+    - name: Enable Site config
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/mm-api
+        dest: /etc/nginx/sites-enabled/mm-api
+        state: link
+      become: true
+      notify: reload nginx
+
+  handlers:
+    - name: Reload nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+      become: true

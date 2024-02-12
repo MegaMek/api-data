@@ -1,0 +1,94 @@
+stages:
+  - build
+  - test
+  - deploy
+  - review
+  - dast
+  - staging
+  - canary
+  - production
+  - incremental rollout 10%
+  - incremental rollout 25%
+  - incremental rollout 50%
+  - incremental rollout 100%
+  - performance
+  - cleanup
+
+include:
+  - template: Auto-DevOps.gitlab-ci.yml
+  - remote: "https://gitlab.tapenvy.us/open-source/ci-templates/-/raw/main/ci/auto-tag-release.gitlab-ci.yml"
+
+sast:
+  stage: test
+
+code_quality:
+  image:
+    name: ghcr.io/realm/swiftlint:latest
+    pull_policy: if-not-present
+  script:
+    - swiftlint lint --reporter codeclimate --output gl-code-quality-report.json
+  artifacts:
+    paths: [gl-code-quality-report.json]
+
+test:
+  image:
+    name: swift:5.9-jammy
+    pull_policy: if-not-present
+  stage: test
+  services:
+    - postgres:latest
+  variables:
+    POSTGRES_USER: vapor_username
+    POSTGRES_PASSWORD: vapor_password
+    POSTGRES_ENABLED: "true"
+    POSTGRES_DB: $CI_COMMIT_SHA
+    DATABASE_HOST: postgres
+    DATABASE_USERNAME: $POSTGRES_USER
+    DATABASE_PASSWORD: $POSTGRES_PASSWORD
+    DATABASE_NAME: $POSTGRES_DB
+  script:
+    - scripts/code_coverage.sh
+  coverage: '/TOTAL.*\s+(\d+\.\d+)%/'
+
+staging:
+  dependencies:
+    - build
+  stage: staging
+  script:
+    - echo $DB_HOST > ansible/templates/database_host
+    - echo $DB_NAME > ansible/templates/database_name
+    - echo $DB_PASSWORD > ansible/templates/database_password
+    - echo $DB_USER > ansible/templates/database_username
+    - echo $CI_REGISTRY_USER > ansible/templates/username
+    - echo $CI_REGISTRY_PASSWORD > ansible/templates/password
+    - echo $SENDGRID_API_KEY > ansible/templates/sendgrid
+    - ansible-playbook ansible/staging.yml
+  environment:
+    name: staging
+    url: https://api.battletech.dev
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+  tags:
+    - deploy
+
+production:
+  dependencies:
+    - build
+  stage: production
+  script:
+    - echo $DATABASE_HOST > ansible/templates/database_host
+    - echo $DATABASE_NAME > ansible/templates/database_name
+    - echo $DATABASE_PASSWORD > ansible/templates/database_password
+    - echo $DATABASE_USER > ansible/templates/database_username
+    - echo $CI_REGISTRY_USER > ansible/templates/username
+    - echo $CI_REGISTRY_PASSWORD > ansible/templates/password
+    - echo $SENDGRID_API_KEY > ansible/templates/sendgrid
+    - ansible-playbook ansible/production.yml
+  environment:
+    name: production
+    url: https://api.battletech.games
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+      when: manual
+  tags:
+    - deploy
