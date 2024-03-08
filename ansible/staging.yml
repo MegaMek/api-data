@@ -96,7 +96,7 @@
         dest: /etc/nginx/sites-enabled/mm-api-develop
         state: link
       become: true
-      notify: reload nginx
+      notify: Reload nginx
 
   handlers:
     - name: Reload nginx
