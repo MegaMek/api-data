@@ -6,10 +6,10 @@
 
   vars:
     server_name: "api.battletech.dev"
-    proxy_server: "battletech_api"
+    proxy_server: "battletech_api_dev"
     proxy_server_url: "localhost:8080"
     cert_name: "battletech.dev"
-    docker_image: "master"
+    docker_image: "develop"
     docker_url: registry.tapenvy.us:443/open-source/megamek/mul-api/{{ docker_image }}:latest
     username: "{{ lookup('file', './templates/username') }}"
     password: "{{ lookup('file', './templates/password') }}"
@@ -92,8 +92,8 @@
 
     - name: Enable Site config
       ansible.builtin.file:
-        src: /etc/nginx/sites-available/mm-api
-        dest: /etc/nginx/sites-enabled/mm-api
+        src: /etc/nginx/sites-available/mm-api-develop
+        dest: /etc/nginx/sites-enabled/mm-api-develop
         state: link
       become: true
       notify: reload nginx
