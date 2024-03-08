@@ -7,7 +7,7 @@
   vars:
     server_name: "api.battletech.dev"
     proxy_server: "battletech_api_dev"
-    proxy_server_url: "localhost:8080"
+    proxy_server_url: "localhost:9080"
     cert_name: "battletech.dev"
     docker_image: "develop"
     docker_url: registry.tapenvy.us:443/open-source/megamek/mul-api/{{ docker_image }}:latest
@@ -70,7 +70,7 @@
         restart_policy: unless-stopped
         pull: true
         ports:
-          - "8080:8080"
+          - "9080:8080"
         env:
           DATABASE_HOST: "{{ database_host }}"
           DATABASE_USERNAME: "{{ database_username }}"
