@@ -14,5 +14,8 @@ struct APIMigrations {
 
         // Migrations
         app.migrations.add(BattleTech.CreateEras())
+        app.migrations.add(BattleTech.CreateFactions())
+        app.migrations.add(BattleTech.CreateFactionNames())
+        app.migrations.add(BattleTech.CreateFactionSubfactionPivot())
     }
 }

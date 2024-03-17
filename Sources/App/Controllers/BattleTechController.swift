@@ -13,6 +13,7 @@ extension BattleTech {
         func boot(routes: any RoutesBuilder) throws {
             let battletech = routes.grouped("battletech")
             try battletech.register(collection: BattleTech.EraController())
+            try battletech.register(collection: BattleTech.FactionController())
         }
     }
 }

@@ -32,7 +32,7 @@ code_quality:
 
 test:
   image:
-    name: swift:5.9-jammy
+    name: swift:5.10-jammy
     pull_policy: if-not-present
   stage: test
   services:

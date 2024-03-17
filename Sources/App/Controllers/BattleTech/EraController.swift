@@ -28,9 +28,7 @@ extension BattleTech {
             let decoder = XMLDecoder()
 
             let xmlString = String(decoding: Data(buffer: input.file.data), as: UTF8.self)
-
             let eras = try decoder.decode(Importers.Eras.self, from: xmlString.data(using: .utf8)!)
-
             for era in eras.era {
                 let newEra = try await BattleTech.Era.findOrNew(importableEra: era, on: req.db(.replica))
                 try await newEra.save(on: req.db(.primary))

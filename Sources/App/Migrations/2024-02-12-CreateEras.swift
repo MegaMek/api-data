@@ -25,7 +25,6 @@ extension BattleTech {
                 .field(BattleTech.Era.V20240212.publishedAt, .datetime)
                 .field(BattleTech.Era.V20240212.createdAt, .datetime)
                 .field(BattleTech.Era.V20240212.updatedAt, .datetime)
-                .field(BattleTech.Era.V20240212.deletedAt, .datetime)
 
                 .unique(on: BattleTech.Era.V20240212.name)
                 .unique(on: BattleTech.Era.V20240212.endYear)
@@ -55,6 +54,5 @@ extension BattleTech.Era {
         static let publishedAt = FieldKey(stringLiteral: "published_at")
         static let createdAt = FieldKey(stringLiteral: "created_at")
         static let updatedAt = FieldKey(stringLiteral: "updated_at")
-        static let deletedAt = FieldKey(stringLiteral: "deleted_at")
     }
 }
