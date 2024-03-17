@@ -33,3 +33,16 @@ extension BattleTech.Era {
         return era
     }
 }
+
+extension BattleTech.Faction {
+    static func create(
+        factionKey: String = "TST",
+        ratingLevels: String = "",
+        on database: any Database
+    ) async throws -> BattleTech.Faction {
+        let faction = BattleTech.Faction(factionKey: factionKey, ratingLevels: ratingLevels)
+
+        try await faction.save(on: database)
+        return faction
+    }
+}

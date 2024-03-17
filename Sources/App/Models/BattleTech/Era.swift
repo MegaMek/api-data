@@ -36,9 +36,6 @@ extension BattleTech {
         @Timestamp(key: BattleTech.Era.V20240212.updatedAt, on: .update)
         var updatedAt: Date?
 
-        @Timestamp(key: BattleTech.Era.V20240212.deletedAt, on: .delete)
-        var deletedAt: Date?
-
         init() { }
 
         init(
