@@ -11,18 +11,18 @@ extension BattleTech {
             factions.post("import", use: massCreate).description("Mass Create Factions")
         }
 
-        func index(req: Request) async throws -> [Faction] {
-            try await Faction.query(on: req.db)
+        func index(req: Request) async throws -> [BattleTech.Faction] {
+            try await BattleTech.Faction.query(on: req.db)
                 .with(\.$names)
                 .with(\.$parents)
                 .with(\.$subfactions)
                 .all()
         }
 
-        func show(req: Request) async throws -> Faction {
+        func show(req: Request) async throws -> BattleTech.Faction {
             guard let factionIdString = req.parameters.get("faction_id"),
               let factionUUID = UUID(factionIdString),
-              let faction = try await Faction.query(on: req.db(.replica))
+              let faction = try await BattleTech.Faction.query(on: req.db(.replica))
                 .with(\.$names)
                 .with(\.$parents)
                 .with(\.$subfactions)
