@@ -11,12 +11,12 @@ extension BattleTech {
             eras.post("import", use: massCreate).description("Mass Create Eras")
         }
 
-        func index(req: Request) async throws -> [Era] {
-            try await Era.query(on: req.db).all()
+        func index(req: Request) async throws -> [BattleTech.Era] {
+            try await BattleTech.Era.query(on: req.db).all()
         }
 
-        func show(req: Request) async throws -> Era {
-            guard let era = try await Era.find(req.parameters.get("era_id"), on: req.db(.replica)) else {
+        func show(req: Request) async throws -> BattleTech.Era {
+            guard let era = try await BattleTech.Era.find(req.parameters.get("era_id"), on: req.db(.replica)) else {
                 throw Abort(.notFound)
             }
 

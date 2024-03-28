@@ -17,5 +17,12 @@ struct APIMigrations {
         app.migrations.add(BattleTech.CreateFactions())
         app.migrations.add(BattleTech.CreateFactionNames())
         app.migrations.add(BattleTech.CreateFactionSubfactionPivot())
+
+        app.migrations.add(BattleTech.CreateRules())
+        app.migrations.add(BattleTech.CreateTechBase())
+        app.migrations.add(BattleTech.CreateTechLevel())
+        app.migrations.add(BattleTech.CreateWeapons())
+        app.migrations.add(BattleTech.CreateWeaponAlias())
+        app.migrations.add(BattleTech.CreateRuleWeaponPivot())
     }
 }

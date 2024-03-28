@@ -14,6 +14,7 @@ extension BattleTech {
             let battletech = routes.grouped("battletech")
             try battletech.register(collection: BattleTech.EraController())
             try battletech.register(collection: BattleTech.FactionController())
+            try battletech.register(collection: BattleTech.WeaponController())
         }
     }
 }
