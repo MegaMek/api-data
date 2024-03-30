@@ -161,18 +161,17 @@ extension BattleTech.FactionName {
       endYear: Int?,
       on database: Database
     ) async throws {
-        guard let foundFactionName = try await faction.$names.query(on: database)
+        if let foundFactionName = try await faction.$names.query(on: database)
             .filter(\.$startYear == startYear)
-            .first() else {
+            .first() {
+              foundFactionName.name = name
+              foundFactionName.startYear = startYear
+              foundFactionName.endYear = endYear
+              try await foundFactionName.save(on: database)
+            } else {
                 let factionName = BattleTech.FactionName(name: name, startYear: startYear, endYear: endYear)
                 factionName.$faction.id = faction.id!
                 try await factionName.save(on: database)
-                return
             }
-
-        foundFactionName.name = name
-        foundFactionName.startYear = startYear
-        foundFactionName.endYear = endYear
-        try await foundFactionName.save(on: database)
     }
 }

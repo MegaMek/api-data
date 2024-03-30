@@ -24,5 +24,10 @@ struct APIMigrations {
         app.migrations.add(BattleTech.CreateWeapons())
         app.migrations.add(BattleTech.CreateWeaponAlias())
         app.migrations.add(BattleTech.CreateRuleWeaponPivot())
+
+        app.migrations.add(BattleTech.CreateMunitionType())
+        app.migrations.add(BattleTech.CreateAmmo())
+        app.migrations.add(BattleTech.CreateAmmoAlias())
+        app.migrations.add(BattleTech.CreateAmmoRulePivot())
     }
 }

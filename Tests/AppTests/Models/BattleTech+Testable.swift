@@ -10,6 +10,67 @@
 import Fluent
 import Vapor
 
+extension BattleTech.Ammo {
+    static func create(
+        name: String = "Test Ammo",
+        techRating: String = "X/A-C-D-A",
+        introductionDate: String = "",
+        prototypeDate: String = "",
+        productionDate: String = "",
+        commonDate: String = "",
+        extinctionDate: String = "",
+        reIntroductionDate: String = "",
+        tonnage: Double = 0.0,
+        criticalSlots: Int = 0,
+        cost: Double = 0.0,
+        battleValue: Double = 0.0,
+        rulesReference: String = "",
+        countAsFlak: Bool = false,
+        damagePerShot: Int = 0,
+        rackSize: Int = 0,
+        shots: Int = 0,
+        ammoRatio: Double = 0.0,
+        isCapital: Bool = false,
+        kilogramPerShot: Double = 0.0,
+        aeroUse: Bool = false,
+        on database: any Database
+    ) async throws -> BattleTech.Ammo {
+        let munitionType = try await BattleTech.MunitionType.create(name: "Test Munition Type", on: database)
+        let techBase = try await BattleTech.TechBase.create(name: "Test Ammo Base", on: database)
+        let techLevel = try await BattleTech.TechLevel.create(name: "Test Ammo Level", on: database)
+
+        let ammo = BattleTech.Ammo(
+            name: name,
+            techBase: techBase,
+            techRating: techRating,
+            techLevelStatic: techLevel,
+            introductionDate: introductionDate,
+            prototypeDate: prototypeDate,
+            productionDate: productionDate,
+            commonDate: commonDate,
+            extinctionDate: extinctionDate,
+            reIntroductionDate: reIntroductionDate,
+            tonnage: tonnage,
+            criticalSlots: criticalSlots,
+            cost: cost,
+            battleValue: battleValue,
+            rulesReference: rulesReference,
+            countAsFlak: countAsFlak,
+            munitionType: munitionType,
+            damagePerShot: damagePerShot,
+            rackSize: rackSize,
+            shots: shots,
+            ammoRatio: ammoRatio,
+            isCapital: isCapital,
+            kilogramPerShot: kilogramPerShot,
+            aeroUse: aeroUse)
+
+        try await ammo.save(on: database)
+        try await ammo.attachRules(rules: ["Test Rule"], on: database)
+        return ammo
+    }
+}
+
 extension BattleTech.Era {
     static func create(
         code: String = "TEST",
@@ -40,10 +101,35 @@ extension BattleTech.Faction {
         ratingLevels: String = "",
         on database: any Database
     ) async throws -> BattleTech.Faction {
-        let faction = BattleTech.Faction(factionKey: factionKey, ratingLevels: ratingLevels)
+        let faction = BattleTech.Faction(
+            factionKey: factionKey,
+            ratingLevels: ratingLevels
+        )
 
         try await faction.save(on: database)
         return faction
+    }
+}
+
+extension BattleTech.MunitionType {
+    static func create(
+        name: String = "Test Munition Type",
+        on database: any Database
+    ) async throws -> BattleTech.MunitionType {
+        let munitionType = BattleTech.MunitionType(name: name)
+        try await munitionType.save(on: database)
+        return munitionType
+    }
+}
+
+extension BattleTech.Rule {
+    static func create(
+        name: String = "Test Rule",
+        on database: any Database
+    ) async throws -> BattleTech.Rule {
+        let rule = BattleTech.Rule(name: name)
+        try await rule.save(on: database)
+        return rule
     }
 }
 
@@ -111,6 +197,7 @@ extension BattleTech.Weapon {
         )
 
         try await weapon.save(on: database)
+        try await weapon.attachRules(rules: ["Test Rule"], on: database)
         return weapon
     }
 }
