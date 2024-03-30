@@ -13,6 +13,9 @@ extension BattleTech {
         var name: String
 
         @Children(for: \.$techLevelStatic)
+        var ammo: [BattleTech.Ammo]
+
+        @Children(for: \.$techLevelStatic)
         var weapons: [BattleTech.Weapon]
 
         init() { }

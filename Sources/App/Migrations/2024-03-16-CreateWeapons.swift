@@ -16,17 +16,11 @@ extension BattleTech {
             try await database.schema(for: BattleTech.Weapon.self)
                 .id()
                 .field(BattleTech.Weapon.V20240316.name, .string, .required)
-                .field(
-                    BattleTech.Weapon.V20240316.techBase,
-                    .uuid,
-                    .required,
+                .field(BattleTech.Weapon.V20240316.techBase, .uuid, .required,
                     .references(BattleTech.TechBase.self, BattleTech.TechBase.V20240316.id)
                 )
                 .field(BattleTech.Weapon.V20240316.techRating, .string, .required)
-                .field(
-                    BattleTech.Weapon.V20240316.techLevelStatic,
-                    .uuid,
-                    .required,
+                .field(BattleTech.Weapon.V20240316.techLevelStatic, .uuid, .required,
                     .references(BattleTech.TechLevel.self, BattleTech.TechBase.V20240316.id)
                 )
                 .field(BattleTech.Weapon.V20240316.introductionDate, .string)

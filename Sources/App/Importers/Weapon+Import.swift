@@ -44,6 +44,8 @@ extension Importers {
 
     func techBase() -> String { row[Importers.WeaponHeaders.techBase.rawValue] }
 
+    func rulesRaw() -> String { row[Importers.WeaponHeaders.rules.rawValue] }
+
     func rules() -> [String] {
       row[Importers.WeaponHeaders.rules.rawValue].split(
         separator: "/",

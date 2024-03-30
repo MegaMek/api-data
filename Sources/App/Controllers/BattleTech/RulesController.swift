@@ -1,0 +1,48 @@
+import Fluent
+import XMLCoder
+import Vapor
+
+extension BattleTech {
+    struct RulesController: RouteCollection {
+        func boot(routes: RoutesBuilder) throws {
+            let rules = routes.grouped("rules")
+            rules.get(use: index).description("All Rules")
+            rules.group(":rule_id") { rule in
+                rule.get(use: show).description("Individual Rule")
+                rule.get("ammo", use: ammo).description("Ammo for Rule")
+                rule.get("weapons", use: weapons).description("Weapons for Rule")
+            }
+
+        }
+
+        func index(req: Request) async throws -> [BattleTech.Rule] {
+            try await BattleTech.Rule.query(on: req.db(.replica)).all()
+        }
+
+        func show(req: Request) async throws -> BattleTech.Rule {
+            try await getRuleForRequest(req: req)
+        }
+
+        func ammo(req: Request) async throws -> Page<BattleTech.Ammo> {
+            let rule = try await getRuleForRequest(req: req)
+            return try await rule.$ammo.query(on: req.db(.replica)).paginate(for: req)
+        }
+
+        func weapons(req: Request) async throws -> Page<BattleTech.Weapon> {
+            let rule = try await getRuleForRequest(req: req)
+            return try await rule.$weapons.query(on: req.db(.replica)).paginate(for: req)
+        }
+
+        private func getRuleForRequest(req: Request) async throws -> BattleTech.Rule {
+            guard let idString = req.parameters.get("rule_id"),
+                let ruleUUID = UUID(idString),
+                let rule = try await BattleTech.Rule.query(on: req.db(.replica))
+                    .filter(\.$id == ruleUUID)
+                    .first() else {
+                        throw Abort(.notFound)
+            }
+
+            return rule
+        }
+    }
+}

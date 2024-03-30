@@ -12,6 +12,9 @@ extension BattleTech {
         @Field(key: BattleTech.Rule.V20240316.name)
         var name: String
 
+        @Siblings(through: BattleTech.AmmoRulePivot.self, from: \.$rule, to: \.$ammo)
+        var ammo: [BattleTech.Ammo]
+
         @Siblings(through: BattleTech.RuleWeaponPivot.self, from: \.$rule, to: \.$weapon)
         var weapons: [BattleTech.Weapon]
 

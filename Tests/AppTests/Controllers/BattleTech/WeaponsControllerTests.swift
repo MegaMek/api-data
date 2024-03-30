@@ -75,6 +75,7 @@ final class WeaponsControllerTests: XCTestCase {
             XCTAssertEqual(response.status, .created)
             let postWeaponsCount = try await BattleTech.Weapon.query(on: app.db(.replica)).count()
             XCTAssertNotEqual(weaponCount, postWeaponsCount)
+            XCTAssertEqual(40, postWeaponsCount)
         })
     }
 
