@@ -56,6 +56,23 @@ final class RulesControllerTests: XCTestCase {
         })
     }
 
+    func testEquipment() async throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+        try await configureApp(app)
+
+        let equipment = try await BattleTech.Equipment.create(on: app.db(.primary))
+        try await equipment.$rules.load(on: app.db(.primary))
+        let rule = equipment.rules.first!
+
+        let showPath = "\(path)/\(rule.id!)/equipment"
+
+        try app.test(.GET, showPath, afterResponse: { response in
+            let returnedEquipment = try response.content.decode(Page<BattleTech.Equipment>.self)
+            XCTAssertEqual(1, returnedEquipment.metadata.total)
+        })
+    }
+
     func testWeapons() async throws {
         let app = Application(.testing)
         defer { app.shutdown() }

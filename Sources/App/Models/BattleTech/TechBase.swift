@@ -16,6 +16,9 @@ extension BattleTech {
         var ammo: [BattleTech.Ammo]
 
         @Children(for: \.$techBase)
+        var equipment: [BattleTech.Equipment]
+
+        @Children(for: \.$techBase)
         var weapons: [BattleTech.Weapon]
 
         init() { }

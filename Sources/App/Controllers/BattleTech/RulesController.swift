@@ -10,6 +10,7 @@ extension BattleTech {
             rules.group(":rule_id") { rule in
                 rule.get(use: show).description("Individual Rule")
                 rule.get("ammo", use: ammo).description("Ammo for Rule")
+                rule.get("equipment", use: equipment).description("Equipment for Rule")
                 rule.get("weapons", use: weapons).description("Weapons for Rule")
             }
 
@@ -26,6 +27,11 @@ extension BattleTech {
         func ammo(req: Request) async throws -> Page<BattleTech.Ammo> {
             let rule = try await getRuleForRequest(req: req)
             return try await rule.$ammo.query(on: req.db(.replica)).paginate(for: req)
+        }
+
+        func equipment(req: Request) async throws -> Page<BattleTech.Equipment> {
+            let rule = try await getRuleForRequest(req: req)
+            return try await rule.$equipment.query(on: req.db(.replica)).paginate(for: req)
         }
 
         func weapons(req: Request) async throws -> Page<BattleTech.Weapon> {

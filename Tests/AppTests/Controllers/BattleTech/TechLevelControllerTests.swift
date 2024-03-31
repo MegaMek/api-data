@@ -53,6 +53,20 @@ final class TechLevelControllerTests: XCTestCase {
         })
     }
 
+    func testEquipment() async throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+        try await configureApp(app)
+
+        let equipment = try await BattleTech.Equipment.create(on: app.db(.primary))
+        let showPath = "\(path)/\(equipment.$techLevelStatic.id)/equipment"
+
+        try app.test(.GET, showPath, afterResponse: { response in
+            let returnedEquipment = try response.content.decode(Page<BattleTech.Equipment>.self)
+            XCTAssertEqual(1, returnedEquipment.metadata.total)
+        })
+    }
+
     func testWeapons() async throws {
         let app = Application(.testing)
         defer { app.shutdown() }
