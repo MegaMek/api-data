@@ -85,7 +85,7 @@
 
     - name: Copy Nginx conf
       ansible.builtin.template:
-        src: templates/mm-api.j2
+        src: templates/nginx.j2
         dest: /etc/nginx/sites-available/mm-api-develop
         mode: "0400"
       become: true
