@@ -131,8 +131,12 @@ extension Importers {
 
     func extremeDamage() -> Int { Int(row[Importers.WeaponHeaders.extremeDamage.rawValue]) ?? 0 }
 
+    func rawAlias() -> String {
+      row[Importers.EquipmentHeaders.alias.rawValue].replacingOccurrences(of: self.name(), with: "")
+    }
+
     func alias() -> [String] {
-      row[Importers.WeaponHeaders.alias.rawValue].split(
+      self.rawAlias().split(
         separator: ",",
         omittingEmptySubsequences: true
       ).uniqued().map(String.init)

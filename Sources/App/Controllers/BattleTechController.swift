@@ -13,6 +13,7 @@ extension BattleTech {
         func boot(routes: any RoutesBuilder) throws {
             let battletech = routes.grouped("battletech")
             try battletech.register(collection: BattleTech.AmmoController())
+            try battletech.register(collection: BattleTech.EquipmentController())
             try battletech.register(collection: BattleTech.EraController())
             try battletech.register(collection: BattleTech.FactionController())
             try battletech.register(collection: BattleTech.MunitionTypeController())

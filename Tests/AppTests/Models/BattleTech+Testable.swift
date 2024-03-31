@@ -95,6 +95,50 @@ extension BattleTech.Era {
     }
 }
 
+extension BattleTech.Equipment {
+    static func create(
+        name: String = "Test Equipment",
+        techRating: String = "X/A-C-D-A",
+        introductionDate: String = "",
+        prototypeDate: String = "",
+        productionDate: String = "",
+        commonDate: String = "",
+        extinctionDate: String = "",
+        reIntroductionDate: String = "",
+        tonnage: Double = 0.0,
+        criticalSlots: Int = 0,
+        cost: Double = 0.0,
+        battleValue: Double = 0.0,
+        rulesReference: String = "",
+        on database: any Database
+    ) async throws -> BattleTech.Equipment {
+        let techBase = try await BattleTech.TechBase.create(name: "Test Equipment Base", on: database)
+        let techLevel = try await BattleTech.TechLevel.create(name: "Test Equipment Level", on: database)
+
+        let ammo = BattleTech.Equipment(
+            name: name,
+            techBase: techBase,
+            techRating: techRating,
+            techLevelStatic: techLevel,
+            introductionDate: introductionDate,
+            prototypeDate: prototypeDate,
+            productionDate: productionDate,
+            commonDate: commonDate,
+            extinctionDate: extinctionDate,
+            reIntroductionDate: reIntroductionDate,
+            tonnage: tonnage,
+            criticalSlots: criticalSlots,
+            cost: cost,
+            battleValue: battleValue,
+            rulesReference: rulesReference
+        )
+
+        try await ammo.save(on: database)
+        try await ammo.attachRules(rules: ["Test Rule"], on: database)
+        return ammo
+    }
+}
+
 extension BattleTech.Faction {
     static func create(
         factionKey: String = "TST",

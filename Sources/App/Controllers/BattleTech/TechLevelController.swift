@@ -10,6 +10,7 @@ extension BattleTech {
             techLevels.group(":tech_level_id") { techLevel in
                 techLevel.get(use: show).description("Individual Tech Level")
                 techLevel.get("ammo", use: ammo).description("Ammo for Tech Level")
+                techLevel.get("equipment", use: equipment).description("Equipment for Tech Level")
                 techLevel.get("weapons", use: weapons).description("Weapons for Tech Level")
             }
 
@@ -26,6 +27,11 @@ extension BattleTech {
         func ammo(req: Request) async throws -> Page<BattleTech.Ammo> {
             let rule = try await getTechLevelForRequest(req: req)
             return try await rule.$ammo.query(on: req.db(.replica)).paginate(for: req)
+        }
+
+        func equipment(req: Request) async throws -> Page<BattleTech.Equipment> {
+            let rule = try await getTechLevelForRequest(req: req)
+            return try await rule.$equipment.query(on: req.db(.replica)).paginate(for: req)
         }
 
         func weapons(req: Request) async throws -> Page<BattleTech.Weapon> {

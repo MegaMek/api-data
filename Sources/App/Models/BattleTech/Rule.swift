@@ -15,6 +15,9 @@ extension BattleTech {
         @Siblings(through: BattleTech.AmmoRulePivot.self, from: \.$rule, to: \.$ammo)
         var ammo: [BattleTech.Ammo]
 
+        @Siblings(through: BattleTech.EquipmentRulePivot.self, from: \.$rule, to: \.$equipment)
+        var equipment: [BattleTech.Equipment]
+
         @Siblings(through: BattleTech.RuleWeaponPivot.self, from: \.$rule, to: \.$weapon)
         var weapons: [BattleTech.Weapon]
 
