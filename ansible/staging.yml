@@ -53,6 +53,7 @@
         name: battletech-api-migrate
         image: "{{ docker_url }}"
         command: migrate -y
+        recreate: true
         pull: true
         env:
           DATABASE_HOST: "{{ database_host }}"
@@ -68,6 +69,7 @@
         state: started
         restart: true
         restart_policy: unless-stopped
+        recreate: true
         pull: true
         ports:
           - "9080:8080"
@@ -97,6 +99,16 @@
         state: link
       become: true
       notify: Reload nginx
+
+    - name: Prune everything (including non-dangling images)
+      community.docker.docker_prune:
+        containers: true
+        images: true
+        images_filters:
+          dangling: true
+        networks: true
+        volumes: true
+        builder_cache: true
 
   handlers:
     - name: Reload nginx
