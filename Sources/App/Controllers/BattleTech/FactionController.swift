@@ -7,8 +7,11 @@ extension BattleTech {
         func boot(routes: RoutesBuilder) throws {
             let factions = routes.grouped("factions")
             factions.get(use: index).description("All Factions")
-            factions.get(":faction_id", use: show).description("Individual Faction")
             factions.post("import", use: massCreate).description("Mass Create Factions")
+            factions.group(":faction_id") { faction in
+                faction.get(use: show).description("Individual Faction")
+                faction.delete(use: delete).description("Delete Faction")
+            }
         }
 
         func index(req: Request) async throws -> [BattleTech.Faction] {
@@ -20,18 +23,13 @@ extension BattleTech {
         }
 
         func show(req: Request) async throws -> BattleTech.Faction {
-            guard let factionIdString = req.parameters.get("faction_id"),
-              let factionUUID = UUID(factionIdString),
-              let faction = try await BattleTech.Faction.query(on: req.db(.replica))
-                .with(\.$names)
-                .with(\.$parents)
-                .with(\.$subfactions)
-                .filter(\.$id == factionUUID)
-                .first() else {
-                throw Abort(.notFound)
-            }
+            return try await factionForReq(req: req)
+        }
 
-            return faction
+        func delete(req: Request) async throws -> HTTPStatus {
+            let faction = try await factionForReq(req: req)
+            try await faction.delete(on: req.db(.primary))
+            return .noContent
         }
 
         func massCreate(req: Request) async throws -> HTTPStatus {
@@ -61,6 +59,22 @@ extension BattleTech {
 
             return .created
         }
+
+        private func factionForReq(req: Request) async throws -> BattleTech.Faction {
+            guard let factionIdString = req.parameters.get("faction_id"),
+              let factionUUID = UUID(factionIdString),
+              let faction = try await BattleTech.Faction.query(on: req.db(.replica))
+                .with(\.$names)
+                .with(\.$parents)
+                .with(\.$subfactions)
+                .filter(\.$id == factionUUID)
+                .first() else {
+                throw Abort(.notFound)
+            }
+
+            return faction
+        }
+
     }
 }
 

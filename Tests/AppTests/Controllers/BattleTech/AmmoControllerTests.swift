@@ -51,6 +51,19 @@ final class AmmoControllerTests: XCTestCase {
         })
     }
 
+    func testDelete() async throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+        try await configureApp(app)
+
+        let ammo = try await BattleTech.Ammo.create(on: app.db(.primary))
+        let showPath = "\(path)/\(ammo.id!)"
+
+        try app.test(.DELETE, showPath, afterResponse: { response in
+            XCTAssertEqual(response.status, .noContent)
+        })
+    }
+
     func testImport() async throws {
         let app = Application(.testing)
         defer { app.shutdown() }

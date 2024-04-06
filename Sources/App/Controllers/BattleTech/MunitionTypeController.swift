@@ -7,8 +7,10 @@ extension BattleTech {
         func boot(routes: RoutesBuilder) throws {
             let munitionTypes = routes.grouped("munition-types")
             munitionTypes.get(use: index).description("All Munition Types")
+
             munitionTypes.group(":munition_type_id") { munitionType in
                 munitionType.get(use: show).description("Individual Munition Type")
+                munitionType.delete(use: delete).description("Delete Munition Type")
                 munitionType.get("ammo", use: ammo).description("Ammo for Munition Type")
             }
 
@@ -20,6 +22,12 @@ extension BattleTech {
 
         func show(req: Request) async throws -> BattleTech.MunitionType {
             return try await getMunitionTypeForRequest(req: req)
+        }
+
+        func delete(req: Request) async throws -> HTTPStatus {
+            let munitionType =  try await getMunitionTypeForRequest(req: req)
+            try await munitionType.delete(on: req.db(.primary))
+            return .noContent
         }
 
         func ammo(req: Request) async throws -> Page<BattleTech.Ammo> {

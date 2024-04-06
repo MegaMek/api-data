@@ -7,8 +7,11 @@ extension BattleTech {
         func boot(routes: RoutesBuilder) throws {
             let ammo = routes.grouped("ammo")
             ammo.get(use: index).description("All Ammo")
-            ammo.get(":ammo_id", use: show).description("Individual Ammo")
             ammo.post("import", use: massCreate).description("Mass Create Ammo")
+            ammo.group(":ammo_id") { item in
+                item.get(use: show).description("Individual Ammo")
+                item.delete(use: delete).description("Delete Ammo")
+            }
         }
 
         func index(req: Request) async throws -> Page<BattleTech.Ammo> {
@@ -22,20 +25,14 @@ extension BattleTech {
         }
 
         func show(req: Request) async throws -> BattleTech.Ammo {
-            guard let ammoIdString = req.parameters.get("ammo_id"),
-              let ammoUUID = UUID(ammoIdString),
-              let ammo = try await BattleTech.Ammo.query(on: req.db(.replica))
-                .with(\.$techBase)
-                .with(\.$rules)
-                .with(\.$techLevelStatic)
-                .with(\.$munitionType)
-                .with(\.$aliases)
-                .filter(\.$id == ammoUUID)
-                .first() else {
-                throw Abort(.notFound)
-            }
+            return try await ammoForRequest(req: req)
+        }
 
-            return ammo
+        func delete(req: Request) async throws -> HTTPStatus {
+            let ammo = try await ammoForRequest(req: req)
+            try await ammo.$rules.detachAll(on: req.db(.primary))
+            try await ammo.delete(on: req.db(.primary))
+            return .noContent
         }
 
         func massCreate(req: Request) async throws -> HTTPStatus {
@@ -58,6 +55,23 @@ extension BattleTech {
             }
 
             return .created
+        }
+
+        private func ammoForRequest(req: Request) async throws -> BattleTech.Ammo {
+            guard let ammoIdString = req.parameters.get("ammo_id"),
+              let ammoUUID = UUID(ammoIdString),
+              let ammo = try await BattleTech.Ammo.query(on: req.db(.replica))
+                .with(\.$techBase)
+                .with(\.$rules)
+                .with(\.$techLevelStatic)
+                .with(\.$munitionType)
+                .with(\.$aliases)
+                .filter(\.$id == ammoUUID)
+                .first() else {
+                throw Abort(.notFound)
+            }
+
+            return ammo
         }
     }
 }
