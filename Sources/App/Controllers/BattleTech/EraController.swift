@@ -7,8 +7,11 @@ extension BattleTech {
         func boot(routes: RoutesBuilder) throws {
             let eras = routes.grouped("eras")
             eras.get(use: index).description("All Eras")
-            eras.get(":era_id", use: show).description("Individual Era")
             eras.post("import", use: massCreate).description("Mass Create Eras")
+            eras.group(":era_id") { era in
+                era.get(use: show).description("Individual Era")
+                era.delete(use: delete).description("Delete Era")
+            }
         }
 
         func index(req: Request) async throws -> [BattleTech.Era] {
@@ -16,11 +19,13 @@ extension BattleTech {
         }
 
         func show(req: Request) async throws -> BattleTech.Era {
-            guard let era = try await BattleTech.Era.find(req.parameters.get("era_id"), on: req.db(.replica)) else {
-                throw Abort(.notFound)
-            }
+            return try await eraForReq(req: req)
+        }
 
-            return era
+        func delete(req: Request) async throws -> HTTPStatus {
+            let era = try await eraForReq(req: req)
+            try await era.delete(on: req.db(.primary))
+            return .noContent
         }
 
         func massCreate(req: Request) async throws -> HTTPStatus {
@@ -35,6 +40,18 @@ extension BattleTech {
             }
 
             return .created
+        }
+
+        private func eraForReq(req: Request) async throws -> BattleTech.Era {
+            guard let eraIdString = req.parameters.get("era_id"),
+              let eraUUID = UUID(eraIdString),
+              let era = try await BattleTech.Era.query(on: req.db(.replica))
+                .filter(\.$id == eraUUID)
+                .first() else {
+                throw Abort(.notFound)
+            }
+
+            return era
         }
     }
 }

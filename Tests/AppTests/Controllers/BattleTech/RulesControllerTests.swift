@@ -39,6 +39,31 @@ final class RulesControllerTests: XCTestCase {
         })
     }
 
+    func testShowNotFound() async throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+        try await configureApp(app)
+
+        let notFoundPath = "\(path)/NOT-A-UUID"
+
+        try app.test(.GET, notFoundPath, afterResponse: { response in
+            XCTAssertEqual(response.status, .notFound)
+        })
+    }
+
+    func testDelete() async throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+        try await configureApp(app)
+
+        let rule = try await BattleTech.Rule.create(on: app.db(.primary))
+        let showPath = "\(path)/\(rule.id!)"
+
+        try app.test(.DELETE, showPath, afterResponse: { response in
+            XCTAssertEqual(response.status, .noContent)
+        })
+    }
+
     func testAmmo() async throws {
         let app = Application(.testing)
         defer { app.shutdown() }
@@ -87,18 +112,6 @@ final class RulesControllerTests: XCTestCase {
         try app.test(.GET, showPath, afterResponse: { response in
             let returnedWeapons = try response.content.decode(Page<BattleTech.Weapon>.self)
             XCTAssertEqual(1, returnedWeapons.metadata.total)
-        })
-    }
-
-    func testShowNotFound() async throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-        try await configureApp(app)
-
-        let notFoundPath = "\(path)/NOT-A-UUID"
-
-        try app.test(.GET, notFoundPath, afterResponse: { response in
-            XCTAssertEqual(response.status, .notFound)
         })
     }
 

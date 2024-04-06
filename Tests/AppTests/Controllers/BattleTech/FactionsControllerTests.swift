@@ -51,6 +51,19 @@ final class FactionsControllerTests: XCTestCase {
         })
     }
 
+    func testDelete() async throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+        try await configureApp(app)
+
+        let faction = try await BattleTech.Faction.create(on: app.db(.primary))
+        let showPath = "\(path)/\(faction.id!)"
+
+        try app.test(.DELETE, showPath, afterResponse: { response in
+            XCTAssertEqual(response.status, .noContent)
+        })
+    }
+
     func testImport() async throws {
         let app = Application(.testing)
         defer { app.shutdown() }

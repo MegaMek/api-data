@@ -9,6 +9,7 @@ extension BattleTech {
             rules.get(use: index).description("All Rules")
             rules.group(":rule_id") { rule in
                 rule.get(use: show).description("Individual Rule")
+                rule.delete(use: delete).description("Delete Rule")
                 rule.get("ammo", use: ammo).description("Ammo for Rule")
                 rule.get("equipment", use: equipment).description("Equipment for Rule")
                 rule.get("weapons", use: weapons).description("Weapons for Rule")
@@ -22,6 +23,12 @@ extension BattleTech {
 
         func show(req: Request) async throws -> BattleTech.Rule {
             try await getRuleForRequest(req: req)
+        }
+
+        func delete(req: Request) async throws -> HTTPStatus {
+            let rule = try await getRuleForRequest(req: req)
+            try await rule.delete(on: req.db(.primary))
+            return .noContent
         }
 
         func ammo(req: Request) async throws -> Page<BattleTech.Ammo> {

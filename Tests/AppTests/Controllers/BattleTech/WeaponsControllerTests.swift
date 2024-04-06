@@ -51,6 +51,19 @@ final class WeaponsControllerTests: XCTestCase {
         })
     }
 
+    func testDelete() async throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+        try await configureApp(app)
+
+        let weapon = try await BattleTech.Weapon.create(on: app.db(.primary))
+        let showPath = "\(path)/\(weapon.id!)"
+
+        try app.test(.DELETE, showPath, afterResponse: { response in
+            XCTAssertEqual(response.status, .noContent)
+        })
+    }
+
     func testImport() async throws {
         let app = Application(.testing)
         defer { app.shutdown() }

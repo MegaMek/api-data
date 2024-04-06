@@ -51,6 +51,19 @@ final class ErasControllerTests: XCTestCase {
         })
     }
 
+    func testDelete() async throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+        try await configureApp(app)
+
+        let era = try await BattleTech.Era.create(on: app.db(.primary))
+        let showPath = "\(path)/\(era.id!)"
+
+        try app.test(.DELETE, showPath, afterResponse: { response in
+            XCTAssertEqual(response.status, .noContent)
+        })
+    }
+
     func testImport() async throws {
         let app = Application(.testing)
         defer { app.shutdown() }

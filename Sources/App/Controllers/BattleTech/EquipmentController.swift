@@ -7,8 +7,11 @@ extension BattleTech {
         func boot(routes: RoutesBuilder) throws {
             let equipment = routes.grouped("equipment")
             equipment.get(use: index).description("All Equipment")
-            equipment.get(":equipment_id", use: show).description("Individual Equipment")
             equipment.post("import", use: massCreate).description("Mass Create Equipment")
+            equipment.group(":equipment_id") { item in
+                item.get(use: show).description("Individual Equipment")
+                item.delete(use: delete).description("Delete Equipment")
+            }
         }
 
         func index(req: Request) async throws -> Page<BattleTech.Equipment> {
@@ -21,19 +24,14 @@ extension BattleTech {
         }
 
         func show(req: Request) async throws -> BattleTech.Equipment {
-            guard let equipmentIdString = req.parameters.get("equipment_id"),
-              let equipmentUUID = UUID(equipmentIdString),
-              let equipment = try await BattleTech.Equipment.query(on: req.db(.replica))
-                .with(\.$techBase)
-                .with(\.$rules)
-                .with(\.$techLevelStatic)
-                .with(\.$aliases)
-                .filter(\.$id == equipmentUUID)
-                .first() else {
-                throw Abort(.notFound)
-            }
+            return try await equipmentForReq(req: req)
+        }
 
-            return equipment
+        func delete(req: Request) async throws -> HTTPStatus {
+            let equipment = try await equipmentForReq(req: req)
+            try await equipment.$rules.detachAll(on: req.db(.primary))
+            try await equipment.delete(on: req.db(.primary))
+            return .noContent
         }
 
         func massCreate(req: Request) async throws -> HTTPStatus {
@@ -56,6 +54,22 @@ extension BattleTech {
             }
 
             return .created
+        }
+
+        private func equipmentForReq(req: Request) async throws -> BattleTech.Equipment {
+            guard let equipmentIdString = req.parameters.get("equipment_id"),
+              let equipmentUUID = UUID(equipmentIdString),
+              let equipment = try await BattleTech.Equipment.query(on: req.db(.replica))
+                .with(\.$techBase)
+                .with(\.$rules)
+                .with(\.$techLevelStatic)
+                .with(\.$aliases)
+                .filter(\.$id == equipmentUUID)
+                .first() else {
+                throw Abort(.notFound)
+            }
+
+            return equipment
         }
     }
 }

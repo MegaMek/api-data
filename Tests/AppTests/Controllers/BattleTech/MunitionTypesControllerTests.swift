@@ -39,6 +39,31 @@ final class MunitionTypesControllerTests: XCTestCase {
         })
     }
 
+    func testShowNotFound() async throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+        try await configureApp(app)
+
+        let notFoundPath = "\(path)/NOT-A-UUID"
+
+        try app.test(.GET, notFoundPath, afterResponse: { response in
+            XCTAssertEqual(response.status, .notFound)
+        })
+    }
+
+    func testDelete() async throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+        try await configureApp(app)
+
+        let munitionType = try await BattleTech.MunitionType.create(on: app.db(.primary))
+        let showPath = "\(path)/\(munitionType.id!)"
+
+        try app.test(.DELETE, showPath, afterResponse: { response in
+            XCTAssertEqual(response.status, .noContent)
+        })
+    }
+
     func testAmmo() async throws {
         let app = Application(.testing)
         defer { app.shutdown() }
@@ -50,18 +75,6 @@ final class MunitionTypesControllerTests: XCTestCase {
         try app.test(.GET, showPath, afterResponse: { response in
             let returnedAmmo = try response.content.decode(Page<BattleTech.Ammo>.self)
             XCTAssertEqual(1, returnedAmmo.metadata.total)
-        })
-    }
-
-    func testShowNotFound() async throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-        try await configureApp(app)
-
-        let notFoundPath = "\(path)/NOT-A-UUID"
-
-        try app.test(.GET, notFoundPath, afterResponse: { response in
-            XCTAssertEqual(response.status, .notFound)
         })
     }
 
