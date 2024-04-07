@@ -2,7 +2,9 @@ import Fluent
 import Vapor
 
 extension BattleTech.Weapon {
-  static func findOrCreate(csvRow: Importers.WeaponCSVRow, on database: Database) async throws -> BattleTech.Weapon {
+  static func findOrCreate(csvRow: Importers.WeaponCSVRow, on database: Database) async throws
+    -> BattleTech.Weapon
+  {
     var weapon: BattleTech.Weapon? = BattleTech.Weapon()
 
     if let foundWeapon = try await BattleTech.Weapon.findByNameOrAliases(
@@ -14,8 +16,13 @@ extension BattleTech.Weapon {
       weapon = foundWeapon
     }
 
-    try await weapon?.updateFromCSVRow(csvRow: csvRow, on: database)
-    try await weapon?.save(on: database)
+    do {
+      try await weapon?.updateFromCSVRow(csvRow: csvRow, on: database)
+      try await weapon?.save(on: database)
+    } catch {
+      print(String(reflecting: error))
+    }
+
     return weapon!
   }
 
@@ -27,13 +34,13 @@ extension BattleTech.Weapon {
   ) async throws -> BattleTech.Weapon? {
 
     let techLevel = try await BattleTech.TechLevel.findOrCreate(
-        tentativeTechLevel: csvRow.staticTechLevel(),
-        with: database
+      tentativeTechLevel: csvRow.staticTechLevel(),
+      with: database
     )
 
     let techBase = try await BattleTech.TechBase.findOrCreate(
-        tentativeTechBase: csvRow.techBase(),
-        with: database
+      tentativeTechBase: csvRow.techBase(),
+      with: database
     )
 
     if let foundByName = try await BattleTech.Weapon.query(on: database)
@@ -42,7 +49,8 @@ extension BattleTech.Weapon {
       .filter(\.$tonnage == csvRow.tonnage())
       .filter(\.$techLevelStatic.$id == techLevel.id!)
       .filter(\.$techBase.$id == techBase.id!)
-      .first() {
+      .first()
+    {
       return foundByName
     }
 
@@ -52,7 +60,8 @@ extension BattleTech.Weapon {
       .filter(\.$tonnage == csvRow.tonnage())
       .filter(\.$techLevelStatic.$id == techLevel.id!)
       .filter(\.$techBase.$id == techBase.id!)
-      .first() {
+      .first()
+    {
       return foundByAliases
     }
 
@@ -60,7 +69,7 @@ extension BattleTech.Weapon {
   }
 
   func attachTechBase(techBase: String, on database: Database) async throws {
-      let record = try await BattleTech.TechBase.findOrCreate(
+    let record = try await BattleTech.TechBase.findOrCreate(
       tentativeTechBase: techBase,
       with: database
     )
@@ -69,7 +78,7 @@ extension BattleTech.Weapon {
   }
 
   func attachTechLevel(techLevel: String, on database: Database) async throws {
-      let record = try await BattleTech.TechLevel.findOrCreate(
+    let record = try await BattleTech.TechLevel.findOrCreate(
       tentativeTechLevel: techLevel,
       with: database
     )
@@ -79,24 +88,35 @@ extension BattleTech.Weapon {
 
   func attachRules(rules: [String], on database: Database) async throws {
     let records = try await BattleTech.Rule.findOrCreate(
-        tentativeRules: rules,
-        with: database
+      tentativeRules: rules,
+      with: database
     )
 
     for rule in records {
+      do {
         try await self.$rules.attach(rule, method: .ifNotExists, on: database)
+      } catch {
+        print(String(reflecting: error))
+      }
+
     }
   }
 
   func attachAliases(aliases: [String], on database: Database) async throws {
-      let records = try await BattleTech.WeaponAlias.findOrCreate(
-        tentativeAliases: aliases,
-        with: database
+    let records = try await BattleTech.WeaponAlias.findOrCreate(
+      tentativeAliases: aliases,
+      with: database
     )
 
     for alias in records {
       alias.$weapon.id = self.id!
-      try await alias.save(on: database)
+
+      do {
+        try await alias.save(on: database)
+      } catch {
+        print(String(reflecting: error))
+      }
+
     }
 
   }
@@ -130,11 +150,16 @@ extension BattleTech.Weapon {
     self.longRangeDamage = csvRow.longDamage()
     self.extremeRangeDamage = csvRow.extremeDamage()
 
-    try await self.attachTechBase(techBase: csvRow.techBase(), on: database)
-    try await self.attachTechLevel(techLevel: csvRow.staticTechLevel(), on: database)
-    try await self.save(on: database)
+    do {
+      try await self.attachTechBase(techBase: csvRow.techBase(), on: database)
+      try await self.attachTechLevel(techLevel: csvRow.staticTechLevel(), on: database)
+      try await self.save(on: database)
 
-    try await self.attachRules(rules: csvRow.rules(), on: database)
-    try await self.attachAliases(aliases: csvRow.alias(), on: database)
+      try await self.attachRules(rules: csvRow.rules(), on: database)
+      try await self.attachAliases(aliases: csvRow.alias(), on: database)
+    } catch {
+      print(String(reflecting: error))
+    }
+
   }
 }
