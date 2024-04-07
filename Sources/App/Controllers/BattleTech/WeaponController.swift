@@ -43,8 +43,7 @@ extension BattleTech {
         let csvRow = Importers.WeaponCSVRow(row: row)
         if csvRow.rulesReference().contains("Unofficial")
           || csvRow.rulesRaw().contains("Unofficial")
-          || csvRow.staticTechLevel().contains("Unofficial")
-        {
+          || csvRow.staticTechLevel().contains("Unofficial") {
           continue
         }
 

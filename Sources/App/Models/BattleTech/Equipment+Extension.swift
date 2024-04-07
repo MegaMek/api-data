@@ -50,8 +50,7 @@ extension BattleTech.Equipment {
       .filter(\.$tonnage == csvRow.tonnage())
       .filter(\.$techLevelStatic.$id == techLevel.id!)
       .filter(\.$techBase.$id == techBase.id!)
-      .first()
-    {
+      .first() {
       return foundByName
     }
 
@@ -61,8 +60,7 @@ extension BattleTech.Equipment {
       .filter(\.$tonnage == csvRow.tonnage())
       .filter(\.$techLevelStatic.$id == techLevel.id!)
       .filter(\.$techBase.$id == techBase.id!)
-      .first()
-    {
+      .first() {
       return foundByAliases
     }
 

@@ -135,8 +135,7 @@ extension BattleTech.Faction {
     for nameChange in nameChanges {
       if let foundName = try await self.$names.query(on: database)
         .filter(\.$startYear == nameChange.year)
-        .first()
-      {
+        .first() {
         foundName.name = nameChange.value
         try await foundName.save(on: database)
       } else {
@@ -170,8 +169,7 @@ extension BattleTech.FactionName {
   ) async throws {
     if let foundFactionName = try await faction.$names.query(on: database)
       .filter(\.$startYear == startYear)
-      .first()
-    {
+      .first() {
       foundFactionName.name = name
       foundFactionName.startYear = startYear
       foundFactionName.endYear = endYear

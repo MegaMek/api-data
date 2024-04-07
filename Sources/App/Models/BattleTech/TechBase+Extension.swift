@@ -3,12 +3,10 @@ import Vapor
 
 extension BattleTech.TechBase {
   static func findOrCreate(tentativeTechBase: String, with database: Database) async throws
-    -> BattleTech.TechBase
-  {
+    -> BattleTech.TechBase {
     if let foundTechBase = try await BattleTech.TechBase.query(on: database)
       .filter(\.$name == tentativeTechBase)
-      .first()
-    {
+      .first() {
       return foundTechBase
     } else {
       let newTechBase = BattleTech.TechBase(name: tentativeTechBase)

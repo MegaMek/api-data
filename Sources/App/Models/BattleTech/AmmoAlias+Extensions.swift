@@ -11,8 +11,7 @@ extension BattleTech.AmmoAlias {
     for alias in tentativeAliases {
       if let foundAlias = try await BattleTech.AmmoAlias.query(on: database)
         .filter(\.$name == alias)
-        .first()
-      {
+        .first() {
         aliases.append(foundAlias)
       } else {
         let newAlias = BattleTech.AmmoAlias(name: alias)

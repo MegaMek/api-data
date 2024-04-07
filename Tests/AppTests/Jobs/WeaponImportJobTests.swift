@@ -74,7 +74,7 @@ final class WeaponImportJobTests: XCTestCase {
       "12",
       "12",
       "12",
-      "Bombast Laser,IS Bombast Laser,ISBombastLaser,",
+      "Bombast Laser,IS Bombast Laser,ISBombastLaser,"
 
     ]
   }

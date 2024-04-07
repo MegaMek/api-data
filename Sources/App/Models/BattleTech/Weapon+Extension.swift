@@ -3,8 +3,7 @@ import Vapor
 
 extension BattleTech.Weapon {
   static func findOrCreate(csvRow: Importers.WeaponCSVRow, on database: Database) async throws
-    -> BattleTech.Weapon
-  {
+    -> BattleTech.Weapon {
     var weapon: BattleTech.Weapon? = BattleTech.Weapon()
 
     if let foundWeapon = try await BattleTech.Weapon.findByNameOrAliases(
@@ -49,8 +48,7 @@ extension BattleTech.Weapon {
       .filter(\.$tonnage == csvRow.tonnage())
       .filter(\.$techLevelStatic.$id == techLevel.id!)
       .filter(\.$techBase.$id == techBase.id!)
-      .first()
-    {
+      .first() {
       return foundByName
     }
 
@@ -60,8 +58,7 @@ extension BattleTech.Weapon {
       .filter(\.$tonnage == csvRow.tonnage())
       .filter(\.$techLevelStatic.$id == techLevel.id!)
       .filter(\.$techBase.$id == techBase.id!)
-      .first()
-    {
+      .first() {
       return foundByAliases
     }
 

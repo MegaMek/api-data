@@ -14,7 +14,7 @@ let package = Package(
     .package(url: "https://github.com/CoreOffice/XMLCoder.git", from: "0.17.1"),
     .package(url: "https://github.com/vapor/redis.git", from: "4.10.0"),
     .package(url: "https://github.com/swiftcsv/SwiftCSV.git", from: "0.9.1"),
-    .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.1.1"),
+    .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.1.1")
   ],
   targets: [
     .executableTarget(
@@ -27,7 +27,7 @@ let package = Package(
         .product(name: "XMLCoder", package: "XMLCoder"),
         .product(name: "Redis", package: "Redis"),
         .product(name: "SwiftCSV", package: "SwiftCSV"),
-        .product(name: "QueuesRedisDriver", package: "queues-redis-driver"),
+        .product(name: "QueuesRedisDriver", package: "queues-redis-driver")
       ]
     ),
     .testTarget(
@@ -43,7 +43,7 @@ let package = Package(
         .product(name: "XMLCoder", package: "XMLCoder"),
         .product(name: "Redis", package: "Redis"),
         .product(name: "QueuesRedisDriver", package: "queues-redis-driver"),
-        .product(name: "SwiftCSV", package: "SwiftCSV"),
-      ]),
+        .product(name: "SwiftCSV", package: "SwiftCSV")
+      ])
   ]
 )

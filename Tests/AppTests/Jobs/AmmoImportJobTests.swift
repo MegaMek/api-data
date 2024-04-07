@@ -69,7 +69,7 @@ final class AmmoImportJobTests: XCTestCase {
       "FALSE",
       "125.0",
       "TRUE",
-      "IS Ammo HVAC/10,ISHVAC10 Ammo,IS Hyper Velocity Autocannon/10 Ammo,Hyper Velocity AC/10 Ammo,",
+      "IS Ammo HVAC/10,ISHVAC10 Ammo,IS Hyper Velocity Autocannon/10 Ammo,Hyper Velocity AC/10 Ammo,"
     ]
   }
 

@@ -8,8 +8,7 @@ extension BattleTech.MunitionType {
   ) async throws -> BattleTech.MunitionType {
     if let foundMunitionType = try await BattleTech.MunitionType.query(on: database)
       .filter(\.$name == tentativeMunitionType)
-      .first()
-    {
+      .first() {
       return foundMunitionType
     } else {
       let newMunitionType = BattleTech.MunitionType(name: tentativeMunitionType)

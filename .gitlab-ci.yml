@@ -64,6 +64,7 @@ staging:
     - echo $CI_REGISTRY_USER > ansible/templates/username
     - echo $CI_REGISTRY_PASSWORD > ansible/templates/password
     - echo $SENDGRID_API_KEY > ansible/templates/sendgrid
+    - echo $REDIS_URL > ansible/templates/redis_url
     - ansible-playbook ansible/staging.yml
   environment:
     name: staging

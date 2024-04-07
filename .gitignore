@@ -18,6 +18,7 @@ ansible/templates/database*
 ansible/templates/password
 ansible/templates/username
 ansible/templates/sendgrid
+ansible/templates/redis_url
 *.profraw
 coverage.info
 coverage/*
