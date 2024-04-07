@@ -21,7 +21,7 @@ extension Importers {
 }
 
 extension Importers {
-  struct EquipmentCSVRow {
+    struct EquipmentCSVRow: Codable {
     init(row: [String]) { self.row = row }
 
     private let row: [String]
@@ -81,11 +81,15 @@ extension Importers {
 
     func tonnage() -> Double { Double(row[Importers.EquipmentHeaders.tonnage.rawValue]) ?? -1.0 }
 
-    func criticalSlots() -> Int { Int(row[Importers.EquipmentHeaders.criticalSlots.rawValue]) ?? -1 }
+    func criticalSlots() -> Int {
+      Int(row[Importers.EquipmentHeaders.criticalSlots.rawValue]) ?? -1
+    }
 
     func cost() -> Double { Double(row[Importers.EquipmentHeaders.cost.rawValue]) ?? -1.0 }
 
-    func battleValue() -> Double { Double(row[Importers.EquipmentHeaders.battleValue.rawValue]) ?? -1.0 }
+    func battleValue() -> Double {
+      Double(row[Importers.EquipmentHeaders.battleValue.rawValue]) ?? -1.0
+    }
 
     func rulesReference() -> String { row[Importers.EquipmentHeaders.rulesReference.rawValue] }
 

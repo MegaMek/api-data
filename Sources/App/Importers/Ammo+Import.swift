@@ -30,7 +30,7 @@ extension Importers {
 }
 
 extension Importers {
-  struct AmmoCSVRow {
+    struct AmmoCSVRow: Codable {
     init(row: [String]) { self.row = row }
 
     private let row: [String]
@@ -122,7 +122,9 @@ extension Importers {
       return value == "TRUE"
     }
 
-    func kilogramPerShot() -> Double { Double(row[Importers.AmmoHeaders.kilogramPerShot.rawValue]) ?? 0.0}
+    func kilogramPerShot() -> Double {
+      Double(row[Importers.AmmoHeaders.kilogramPerShot.rawValue]) ?? 0.0
+    }
 
     func aeroUse() -> Bool {
       let value = row[Importers.AmmoHeaders.countAsFlak.rawValue]

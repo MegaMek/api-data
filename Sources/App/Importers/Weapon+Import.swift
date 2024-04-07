@@ -35,7 +35,7 @@ extension Importers {
 }
 
 extension Importers {
-  struct WeaponCSVRow {
+  struct WeaponCSVRow: Codable {
     init(row: [String]) { self.row = row }
 
     private let row: [String]
@@ -99,7 +99,9 @@ extension Importers {
 
     func cost() -> Double { Double(row[Importers.WeaponHeaders.cost.rawValue]) ?? 0.0 }
 
-    func battleValue() -> Double { Double(row[Importers.WeaponHeaders.battleValue.rawValue]) ?? 0.0 }
+    func battleValue() -> Double {
+      Double(row[Importers.WeaponHeaders.battleValue.rawValue]) ?? 0.0
+    }
 
     func rulesReference() -> String { row[Importers.WeaponHeaders.rulesReference.rawValue] }
 
@@ -113,13 +115,19 @@ extension Importers {
 
     func extremeRange() -> Int { Int(row[Importers.WeaponHeaders.extremeRange.rawValue]) ?? 0 }
 
-    func shortWaterRange() -> Int { Int(row[Importers.WeaponHeaders.shortWaterRange.rawValue]) ?? 0 }
+    func shortWaterRange() -> Int {
+      Int(row[Importers.WeaponHeaders.shortWaterRange.rawValue]) ?? 0
+    }
 
-    func mediumWaterRange() -> Int { Int(row[Importers.WeaponHeaders.mediumWaterRange.rawValue]) ?? 0 }
+    func mediumWaterRange() -> Int {
+      Int(row[Importers.WeaponHeaders.mediumWaterRange.rawValue]) ?? 0
+    }
 
     func longWaterRange() -> Int { Int(row[Importers.WeaponHeaders.longWaterRange.rawValue]) ?? 0 }
 
-    func extremeWaterRange() -> Int { Int(row[Importers.WeaponHeaders.extremeWaterRange.rawValue]) ?? 0 }
+    func extremeWaterRange() -> Int {
+      Int(row[Importers.WeaponHeaders.extremeWaterRange.rawValue]) ?? 0
+    }
 
     func minimalDamage() -> Int { Int(row[Importers.WeaponHeaders.minimalDamage.rawValue]) ?? 0 }
 
