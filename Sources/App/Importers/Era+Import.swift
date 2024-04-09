@@ -23,7 +23,11 @@ extension Importers {
 }
 
 extension BattleTech.Era {
-  static func findOrNew(importableEra: Importers.Era, on database: Database) async throws
+  static func findOrNew(
+    importableEra: Importers.Era,
+    startYear: Int,
+    on database: Database
+  ) async throws
     -> BattleTech.Era
   {
     guard
@@ -34,6 +38,7 @@ extension BattleTech.Era {
       return BattleTech.Era(
         code: importableEra.code,
         name: importableEra.name,
+        startYear: startYear,
         endYear: importableEra.end ?? -1,
         flag: importableEra.flag,
         icon: importableEra.icon ?? nil,
@@ -42,7 +47,8 @@ extension BattleTech.Era {
     }
 
     foundEra.name = importableEra.name
-    foundEra.endYear = importableEra.end ?? -1
+    foundEra.startYear = startYear
+    foundEra.endYear = importableEra.end ?? 9999
     foundEra.flag = importableEra.flag
     foundEra.icon = importableEra.icon ?? nil
     foundEra.mulId = importableEra.mulid ?? -1
