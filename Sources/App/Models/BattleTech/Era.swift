@@ -15,6 +15,9 @@ extension BattleTech {
     @Field(key: BattleTech.Era.V20240212.name)
     var name: String
 
+    @OptionalField(key: BattleTech.Era.V20240409.startYear)
+    var startYear: Int?
+
     @Field(key: BattleTech.Era.V20240212.endYear)
     var endYear: Int
 
@@ -42,6 +45,7 @@ extension BattleTech {
       id: UUID? = nil,
       code: String,
       name: String,
+      startYear: Int = -1,
       endYear: Int = -1,
       flag: String,
       icon: String? = nil,
@@ -51,6 +55,7 @@ extension BattleTech {
       self.id = id
       self.code = code
       self.name = name
+      self.startYear = startYear
       self.endYear = endYear
       self.flag = flag
       self.icon = icon

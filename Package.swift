@@ -7,12 +7,12 @@ let package = Package(
     .macOS(.v13)
   ],
   dependencies: [
-    .package(url: "https://github.com/vapor/vapor.git", from: "4.92.5"),
+    .package(url: "https://github.com/vapor/vapor.git", from: "4.92.6"),
     .package(url: "https://github.com/vapor/fluent.git", from: "4.9.0"),
     .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.8.0"),
     .package(url: "https://github.com/vapor/leaf.git", from: "4.3.0"),
     .package(url: "https://github.com/CoreOffice/XMLCoder.git", from: "0.17.1"),
-    .package(url: "https://github.com/vapor/redis.git", from: "4.0.0"),
+    .package(url: "https://github.com/vapor/redis.git", from: "4.10.0"),
     .package(url: "https://github.com/swiftcsv/SwiftCSV.git", from: "0.9.1"),
     .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.1.1"),
   ],

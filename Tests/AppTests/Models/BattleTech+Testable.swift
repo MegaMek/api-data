@@ -78,6 +78,7 @@ extension BattleTech.Era {
   static func create(
     code: String = "TEST",
     name: String = "Test Era",
+    startYear: Int = 0,
     endYear: Int = 9999,
     flag: String = "TEST_FLAG",
     icon: String = "test.png",
@@ -87,6 +88,7 @@ extension BattleTech.Era {
     let era = BattleTech.Era(
       code: code,
       name: name,
+      startYear: startYear,
       endYear: endYear,
       flag: flag,
       icon: icon,

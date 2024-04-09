@@ -15,7 +15,9 @@ extension BattleTech {
     }
 
     func index(req: Request) async throws -> [BattleTech.Era] {
-      try await BattleTech.Era.query(on: req.db).all()
+      try await BattleTech.Era.query(on: req.db)
+        .sort(\.$startYear)
+        .all()
     }
 
     func show(req: Request) async throws -> BattleTech.Era {
@@ -34,9 +36,16 @@ extension BattleTech {
 
       let xmlString = String(decoding: Data(buffer: input.file.data), as: UTF8.self)
       let eras = try decoder.decode(Importers.Eras.self, from: xmlString.data(using: .utf8)!)
-      for era in eras.era {
-        let newEra = try await BattleTech.Era.findOrNew(importableEra: era, on: req.db(.replica))
+      let sortedEras = eras.era.sorted { ($0.end ?? 9999) < ($1.end ?? 9999) }
+      var startYear = -1
+      for era in sortedEras {
+        let newEra = try await BattleTech.Era.findOrNew(
+          importableEra: era,
+          startYear: startYear + 1,
+          on: req.db(.replica)
+        )
         try await newEra.save(on: req.db(.primary))
+        startYear = era.end ?? 9999
       }
 
       return .created
