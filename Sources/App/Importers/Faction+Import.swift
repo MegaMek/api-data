@@ -20,6 +20,7 @@ extension Importers {
     let clan: Bool
     let periphery: Bool
     let years: String
+    var image: String?
     var ratingLevels: String?
     var parentFaction: String?
     var nameChange: [FactionNameChange]?
@@ -28,18 +29,20 @@ extension Importers {
   struct FactionNameChange: Codable {
     let year: Int
     let value: String
+    var image: String?
   }
 }
 
 extension Importers.FactionNameChange: DynamicNodeDecoding {
   enum CodingKeys: String, CodingKey {
     case year
+    case image
     case value = ""
   }
 
   static func nodeDecoding(for key: any CodingKey) -> XMLCoder.XMLDecoder.NodeDecoding {
     switch key {
-    case CodingKeys.year:
+    case CodingKeys.year, CodingKeys.image:
       return .attribute
     default:
       return .element
@@ -120,7 +123,9 @@ extension BattleTech.Faction {
         faction: self,
         name: importableFaction.name,
         startYear: startYear,
-        endYear: endYear, on: database
+        endYear: endYear,
+        image: importableFaction.image,
+        on: database
       )
     }
 
@@ -135,7 +140,8 @@ extension BattleTech.Faction {
     for nameChange in nameChanges {
       if let foundName = try await self.$names.query(on: database)
         .filter(\.$startYear == nameChange.year)
-        .first() {
+        .first()
+      {
         foundName.name = nameChange.value
         try await foundName.save(on: database)
       } else {
@@ -146,7 +152,8 @@ extension BattleTech.Faction {
         let newName = BattleTech.FactionName(
           name: nameChange.value,
           startYear: nameChange.year,
-          endYear: previousName.endYear
+          endYear: previousName.endYear,
+          image: nameChange.image
         )
 
         newName.$faction.id = self.id!
@@ -165,17 +172,20 @@ extension BattleTech.FactionName {
     name: String,
     startYear: Int?,
     endYear: Int?,
+    image: String?,
     on database: Database
   ) async throws {
     if let foundFactionName = try await faction.$names.query(on: database)
       .filter(\.$startYear == startYear)
-      .first() {
+      .first()
+    {
       foundFactionName.name = name
       foundFactionName.startYear = startYear
       foundFactionName.endYear = endYear
+      foundFactionName.image = image
       try await foundFactionName.save(on: database)
     } else {
-      let factionName = BattleTech.FactionName(name: name, startYear: startYear, endYear: endYear)
+      let factionName = BattleTech.FactionName(name: name, startYear: startYear, endYear: endYear, image: image)
       factionName.$faction.id = faction.id!
       try await factionName.save(on: database)
     }

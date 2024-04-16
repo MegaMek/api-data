@@ -35,5 +35,6 @@ struct APIMigrations {
     app.migrations.add(BattleTech.CreateEquipmentRulePivot())
 
     app.migrations.add(BattleTech.AddStartYearToEras())
+    app.migrations.add(BattleTech.AddImageToFactionName())
   }
 }
