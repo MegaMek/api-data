@@ -21,17 +21,22 @@ extension BattleTech {
     @Parent(key: BattleTech.FactionName.V20240316.faction)
     var faction: BattleTech.Faction
 
+    @OptionalField(key: BattleTech.FactionName.V20240415.image)
+    var image: String?
+
     init() {}
 
     init(
       id: UUID? = nil,
       name: String,
       startYear: Int? = nil,
-      endYear: Int? = nil
+      endYear: Int? = nil,
+      image: String? = nil
     ) {
       self.id = id
       self.name = name
       self.startYear = startYear
+      self.image = image
       self.endYear = endYear
     }
   }
