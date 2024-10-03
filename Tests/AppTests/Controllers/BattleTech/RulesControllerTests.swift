@@ -11,17 +11,27 @@ import XCTVapor
 
 final class RulesControllerTests: XCTestCase {
   var path = "/battletech/rules"
+    var app: Application!
+
+    override func setUp() async throws {
+        self.app = try await Application.make(.testing)
+        try await configure(app)
+        try await app.autoMigrate()
+    }
+
+    override func tearDown() async throws {
+        try await app.autoRevert()
+        try await self.app.asyncShutdown()
+        self.app = nil
+    }
 
   func testIndex() async throws {
-    let app = Application(.testing)
-    defer { app.shutdown() }
-    try await configureApp(app)
-
     _ = try await BattleTech.Rule.create(on: app.db(.primary))
     let ruleCount = try await BattleTech.Rule.query(on: app.db(.replica)).count()
 
     try app.test(
       .GET, path,
+      loggedInRequest: false,
       afterResponse: { response in
         let rules = try response.content.decode([BattleTech.Rule].self)
         XCTAssertEqual(rules.count, ruleCount)
@@ -29,15 +39,12 @@ final class RulesControllerTests: XCTestCase {
   }
 
   func testShow() async throws {
-    let app = Application(.testing)
-    defer { app.shutdown() }
-    try await configureApp(app)
-
     let rule = try await BattleTech.Rule.create(on: app.db(.primary))
     let showPath = "\(path)/\(rule.id!)"
 
     try app.test(
       .GET, showPath,
+      loggedInRequest: false,
       afterResponse: { response in
         let returnedRule = try response.content.decode(BattleTech.Rule.self)
         XCTAssertEqual(rule.name, returnedRule.name)
@@ -45,39 +52,29 @@ final class RulesControllerTests: XCTestCase {
   }
 
   func testShowNotFound() async throws {
-    let app = Application(.testing)
-    defer { app.shutdown() }
-    try await configureApp(app)
-
     let notFoundPath = "\(path)/NOT-A-UUID"
 
     try app.test(
       .GET, notFoundPath,
+      loggedInRequest: false,
       afterResponse: { response in
         XCTAssertEqual(response.status, .notFound)
       })
   }
 
   func testDelete() async throws {
-    let app = Application(.testing)
-    defer { app.shutdown() }
-    try await configureApp(app)
-
     let rule = try await BattleTech.Rule.create(on: app.db(.primary))
     let showPath = "\(path)/\(rule.id!)"
 
     try app.test(
       .DELETE, showPath,
+      loggedInRequest: false,
       afterResponse: { response in
         XCTAssertEqual(response.status, .noContent)
       })
   }
 
   func testAmmo() async throws {
-    let app = Application(.testing)
-    defer { app.shutdown() }
-    try await configureApp(app)
-
     let ammo = try await BattleTech.Ammo.create(on: app.db(.primary))
     try await ammo.$rules.load(on: app.db(.primary))
     let rule = ammo.rules.first!
@@ -86,6 +83,7 @@ final class RulesControllerTests: XCTestCase {
 
     try app.test(
       .GET, showPath,
+      loggedInRequest: false,
       afterResponse: { response in
         let returnedAmmo = try response.content.decode(Page<BattleTech.Ammo>.self)
         XCTAssertEqual(1, returnedAmmo.metadata.total)
@@ -93,10 +91,6 @@ final class RulesControllerTests: XCTestCase {
   }
 
   func testEquipment() async throws {
-    let app = Application(.testing)
-    defer { app.shutdown() }
-    try await configureApp(app)
-
     let equipment = try await BattleTech.Equipment.create(on: app.db(.primary))
     try await equipment.$rules.load(on: app.db(.primary))
     let rule = equipment.rules.first!
@@ -105,6 +99,7 @@ final class RulesControllerTests: XCTestCase {
 
     try app.test(
       .GET, showPath,
+      loggedInRequest: false,
       afterResponse: { response in
         let returnedEquipment = try response.content.decode(Page<BattleTech.Equipment>.self)
         XCTAssertEqual(1, returnedEquipment.metadata.total)
@@ -112,10 +107,6 @@ final class RulesControllerTests: XCTestCase {
   }
 
   func testWeapons() async throws {
-    let app = Application(.testing)
-    defer { app.shutdown() }
-    try await configureApp(app)
-
     let weapon = try await BattleTech.Weapon.create(on: app.db(.primary))
     try await weapon.$rules.load(on: app.db(.primary))
     let rule = weapon.rules.first!
@@ -124,15 +115,10 @@ final class RulesControllerTests: XCTestCase {
 
     try app.test(
       .GET, showPath,
+      loggedInRequest: false,
       afterResponse: { response in
         let returnedWeapons = try response.content.decode(Page<BattleTech.Weapon>.self)
         XCTAssertEqual(1, returnedWeapons.metadata.total)
       })
-  }
-
-  private func configureApp(_ app: Application) async throws {
-    try await configure(app)
-    try await app.autoRevert()
-    try await app.autoMigrate()
   }
 }

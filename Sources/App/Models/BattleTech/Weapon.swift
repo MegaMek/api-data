@@ -2,7 +2,7 @@ import Fluent
 import Vapor
 
 extension BattleTech {
-  final class Weapon: Model, Content {
+  final class Weapon: Model, Content, @unchecked Sendable {
     static let schema = BattleTech.Weapon.V20240316.schemaName
     public static let space: String? = BattleTech.Weapon.V20240316.spaceName
 

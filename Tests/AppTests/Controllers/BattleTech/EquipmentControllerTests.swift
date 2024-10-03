@@ -10,18 +10,28 @@ import XCTVapor
 @testable import App
 
 final class EquipmentControllerTests: XCTestCase {
+    var app: Application!
   var path = "/battletech/equipment"
 
-  func testIndex() async throws {
-    let app = Application(.testing)
-    defer { app.shutdown() }
-    try await configureApp(app)
+    override func setUp() async throws {
+        self.app = try await Application.make(.testing)
+        try await configure(app)
+        try await app.autoMigrate()
+    }
 
+    override func tearDown() async throws {
+        try await app.autoRevert()
+        try await self.app.asyncShutdown()
+        self.app = nil
+    }
+
+  func testIndex() async throws {
     _ = try await BattleTech.Equipment.create(on: app.db(.primary))
     let equipmentCount = try await BattleTech.Equipment.query(on: app.db(.replica)).count()
 
     try app.test(
       .GET, path,
+      loggedInRequest: false,
       afterResponse: { response in
         let equipment = try response.content.decode(Page<BattleTech.Equipment>.self)
         XCTAssertEqual(equipment.metadata.total, equipmentCount)
@@ -29,15 +39,12 @@ final class EquipmentControllerTests: XCTestCase {
   }
 
   func testShow() async throws {
-    let app = Application(.testing)
-    defer { app.shutdown() }
-    try await configureApp(app)
-
     let equipment = try await BattleTech.Equipment.create(on: app.db(.primary))
     let showPath = "\(path)/\(equipment.id!)"
 
     try app.test(
       .GET, showPath,
+      loggedInRequest: false,
       afterResponse: { response in
         let returnedEquipment = try response.content.decode(BattleTech.Equipment.self)
         XCTAssertEqual(equipment.name, returnedEquipment.name)
@@ -45,39 +52,29 @@ final class EquipmentControllerTests: XCTestCase {
   }
 
   func testShowNotFound() async throws {
-    let app = Application(.testing)
-    defer { app.shutdown() }
-    try await configureApp(app)
-
     let notFoundPath = "\(path)/NOT-A-UUID"
 
     try app.test(
       .GET, notFoundPath,
+      loggedInRequest: false,
       afterResponse: { response in
         XCTAssertEqual(response.status, .notFound)
       })
   }
 
   func testDelete() async throws {
-    let app = Application(.testing)
-    defer { app.shutdown() }
-    try await configureApp(app)
-
     let equipment = try await BattleTech.Equipment.create(on: app.db(.primary))
     let showPath = "\(path)/\(equipment.id!)"
 
     try app.test(
       .DELETE, showPath,
+      loggedInRequest: false,
       afterResponse: { response in
         XCTAssertEqual(response.status, .noContent)
       })
   }
 
   func testImport() async throws {
-    let app = Application(.testing)
-    defer { app.shutdown() }
-    try await configureApp(app)
-
     let (testFileHandle, testFileRegion) = try await app.fileio.openFile(
       path: "Tests/Resources/BattleTech/misc.csv",
       eventLoop: app.eventLoopGroup.next()
@@ -93,6 +90,7 @@ final class EquipmentControllerTests: XCTestCase {
 
     try app.test(
       .POST, massImportPath,
+      loggedInRequest: false,
       beforeRequest: { request in
         try request.content.encode(equipmentMassImport)
       },
@@ -102,11 +100,5 @@ final class EquipmentControllerTests: XCTestCase {
       })
 
     _ = app.redis.send(command: "FLUSHDB")
-  }
-
-  private func configureApp(_ app: Application) async throws {
-    try await configure(app)
-    try await app.autoRevert()
-    try await app.autoMigrate()
   }
 }

@@ -2,7 +2,7 @@ import Fluent
 import Vapor
 
 extension BattleTech {
-  final class RuleWeaponPivot: Model, Content {
+  final class RuleWeaponPivot: Model, Content, @unchecked Sendable {
     static let schema = BattleTech.RuleWeaponPivot.V20240316.schemaName
     public static let space: String? = BattleTech.RuleWeaponPivot.V20240316.spaceName
 
