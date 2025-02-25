@@ -10,16 +10,16 @@ import Queues
 import Vapor
 
 struct AmmoImportJob: AsyncJob {
-  typealias Payload = Importers.AmmoCSVRow
+    typealias Payload = Importers.AmmoCSVRow
 
-  func dequeue(_ context: QueueContext, _ payload: Importers.AmmoCSVRow) async throws {
-    _ = try await BattleTech.Ammo.findOrCreate(
-      csvRow: payload,
-      on: context.application.db(.primary)
-    )
-  }
+    func dequeue(_ context: QueueContext, _ payload: Importers.AmmoCSVRow) async throws {
+        _ = try await BattleTech.Ammo.findOrCreate(
+            csvRow: payload,
+            on: context.application.db
+        )
+    }
 
-  public func nextRetryIn(attempt: Int) -> Int {
-    return Int.random(in: 15...60)
-  }
+    public func nextRetryIn(attempt: Int) -> Int {
+        return Int.random(in: 15...60)
+    }
 }

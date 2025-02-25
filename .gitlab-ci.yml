@@ -32,14 +32,12 @@ code_quality:
 
 test:
   image:
-    name: swift:5.10-jammy
+    name: swift:6.0-noble
     pull_policy: if-not-present
   stage: test
   services:
-    - redis:latest
     - postgres:latest
   variables:
-    REDIS_URL: "redis://redis/1"
     POSTGRES_USER: vapor_username
     POSTGRES_PASSWORD: vapor_password
     POSTGRES_ENABLED: "true"
@@ -64,7 +62,6 @@ staging:
     - echo $CI_REGISTRY_USER > ansible/templates/username
     - echo $CI_REGISTRY_PASSWORD > ansible/templates/password
     - echo $SENDGRID_API_KEY > ansible/templates/sendgrid
-    - echo $REDIS_URL > ansible/templates/redis_url
     - ansible-playbook ansible/staging.yml
   environment:
     name: staging

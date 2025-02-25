@@ -11,23 +11,23 @@ import Fluent
 import FluentSQL
 
 extension BattleTech {
-  struct AddImageToFactionName: AsyncMigration {
-    func prepare(on database: any Database) async throws {
-      try await database.schema(for: BattleTech.FactionName.self)
-        .field(BattleTech.FactionName.V20240415.image, .string)
-        .update()
-    }
+    struct AddImageToFactionName: AsyncMigration {
+        func prepare(on database: any Database) async throws {
+            try await database.schema(for: BattleTech.FactionName.self)
+                .field(BattleTech.FactionName.V20240415.image, .string)
+                .update()
+        }
 
-    func revert(on database: any Database) async throws {
-      try await database.schema(for: BattleTech.FactionName.self)
-        .deleteField(BattleTech.FactionName.V20240415.image)
-        .update()
+        func revert(on database: any Database) async throws {
+            try await database.schema(for: BattleTech.FactionName.self)
+                .deleteField(BattleTech.FactionName.V20240415.image)
+                .update()
+        }
     }
-  }
 }
 
 extension BattleTech.FactionName {
-  enum V20240415 {
-    static let image = FieldKey(stringLiteral: "image_name")
-  }
+    enum V20240415 {
+        static let image = FieldKey(stringLiteral: "image_name")
+    }
 }

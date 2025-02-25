@@ -1,21 +1,28 @@
+/*
+ * Main Entrypoint for the service.
+ */
+
 import Logging
+import NIOCore
+import NIOPosix
 import Vapor
 
 @main
 enum Entrypoint {
-  static func main() async throws {
-    var env = try Environment.detect()
-    try LoggingSystem.bootstrap(from: &env)
+    static func main() async throws {
+        var env = try Environment.detect()
+        try LoggingSystem.bootstrap(from: &env)
 
-    let app = Application(env)
-    defer { app.shutdown() }
+        let app = try await Application.make(env)
 
-    do {
-      try await configure(app)
-    } catch {
-      app.logger.report(error: error)
-      throw error
+        do {
+            try await configure(app)
+        } catch {
+            app.logger.report(error: error)
+            try? await app.asyncShutdown()
+            throw error
+        }
+        try await app.execute()
+        try await app.asyncShutdown()
     }
-    try await app.execute()
-  }
 }

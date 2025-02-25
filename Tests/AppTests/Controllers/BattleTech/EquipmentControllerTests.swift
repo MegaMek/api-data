@@ -10,103 +10,103 @@ import XCTVapor
 @testable import App
 
 final class EquipmentControllerTests: XCTestCase {
-  var path = "/battletech/equipment"
+    var path = "/battletech/equipment"
 
-  func testIndex() async throws {
-    let app = Application(.testing)
-    defer { app.shutdown() }
-    try await configureApp(app)
+    func testIndex() async throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+        try await configureApp(app)
 
-    _ = try await BattleTech.Equipment.create(on: app.db(.primary))
-    let equipmentCount = try await BattleTech.Equipment.query(on: app.db(.replica)).count()
+        _ = try await BattleTech.Equipment.create(on: app.db)
+        let equipmentCount = try await BattleTech.Equipment.query(on: app.db).count()
 
-    try app.test(
-      .GET, path,
-      afterResponse: { response in
-        let equipment = try response.content.decode(Page<BattleTech.Equipment>.self)
-        XCTAssertEqual(equipment.metadata.total, equipmentCount)
-      })
-  }
+        try app.test(
+            .GET, path,
+            afterResponse: { response in
+                let equipment = try response.content.decode(Page<BattleTech.Equipment>.self)
+                XCTAssertEqual(equipment.metadata.total, equipmentCount)
+            })
+    }
 
-  func testShow() async throws {
-    let app = Application(.testing)
-    defer { app.shutdown() }
-    try await configureApp(app)
+    func testShow() async throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+        try await configureApp(app)
 
-    let equipment = try await BattleTech.Equipment.create(on: app.db(.primary))
-    let showPath = "\(path)/\(equipment.id!)"
+        let equipment = try await BattleTech.Equipment.create(on: app.db)
+        let showPath = "\(path)/\(equipment.id!)"
 
-    try app.test(
-      .GET, showPath,
-      afterResponse: { response in
-        let returnedEquipment = try response.content.decode(BattleTech.Equipment.self)
-        XCTAssertEqual(equipment.name, returnedEquipment.name)
-      })
-  }
+        try app.test(
+            .GET, showPath,
+            afterResponse: { response in
+                let returnedEquipment = try response.content.decode(BattleTech.Equipment.self)
+                XCTAssertEqual(equipment.name, returnedEquipment.name)
+            })
+    }
 
-  func testShowNotFound() async throws {
-    let app = Application(.testing)
-    defer { app.shutdown() }
-    try await configureApp(app)
+    func testShowNotFound() async throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+        try await configureApp(app)
 
-    let notFoundPath = "\(path)/NOT-A-UUID"
+        let notFoundPath = "\(path)/NOT-A-UUID"
 
-    try app.test(
-      .GET, notFoundPath,
-      afterResponse: { response in
-        XCTAssertEqual(response.status, .notFound)
-      })
-  }
+        try app.test(
+            .GET, notFoundPath,
+            afterResponse: { response in
+                XCTAssertEqual(response.status, .notFound)
+            })
+    }
 
-  func testDelete() async throws {
-    let app = Application(.testing)
-    defer { app.shutdown() }
-    try await configureApp(app)
+    func testDelete() async throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+        try await configureApp(app)
 
-    let equipment = try await BattleTech.Equipment.create(on: app.db(.primary))
-    let showPath = "\(path)/\(equipment.id!)"
+        let equipment = try await BattleTech.Equipment.create(on: app.db)
+        let showPath = "\(path)/\(equipment.id!)"
 
-    try app.test(
-      .DELETE, showPath,
-      afterResponse: { response in
-        XCTAssertEqual(response.status, .noContent)
-      })
-  }
+        try app.test(
+            .DELETE, showPath,
+            afterResponse: { response in
+                XCTAssertEqual(response.status, .noContent)
+            })
+    }
 
-  func testImport() async throws {
-    let app = Application(.testing)
-    defer { app.shutdown() }
-    try await configureApp(app)
+    func testImport() async throws {
+        let app = Application(.testing)
+        defer { app.shutdown() }
+        try await configureApp(app)
 
-    let (testFileHandle, testFileRegion) = try await app.fileio.openFile(
-      path: "Tests/Resources/BattleTech/misc.csv",
-      eventLoop: app.eventLoopGroup.next()
-    ).get()
+        let (testFileHandle, testFileRegion) = try await app.fileio.openFile(
+            path: "Tests/Resources/BattleTech/misc.csv",
+            eventLoop: app.eventLoopGroup.next()
+        ).get()
 
-    let testFileByteBuffer = try await app.fileio.read(
-      fileRegion: testFileRegion, allocator: .init())
-    let equipmentMassImport = EquipmentMassImport(
-      file: File(data: testFileByteBuffer, filename: "misc.csv"))
-    try testFileHandle.close()
+        let testFileByteBuffer = try await app.fileio.read(
+            fileRegion: testFileRegion, allocator: .init())
+        let equipmentMassImport = EquipmentMassImport(
+            file: File(data: testFileByteBuffer, filename: "misc.csv"))
+        try testFileHandle.close()
 
-    let massImportPath = "\(path)/import"
+        let massImportPath = "\(path)/import"
 
-    try app.test(
-      .POST, massImportPath,
-      beforeRequest: { request in
-        try request.content.encode(equipmentMassImport)
-      },
-      afterResponse: { response in
-        XCTAssertEqual(response.status, .created)
-        XCTAssertNotNil(app.queues.queue.pop())
-      })
+        try app.test(
+            .POST, massImportPath,
+            beforeRequest: { request in
+                try request.content.encode(equipmentMassImport)
+            },
+            afterResponse: { response in
+                XCTAssertEqual(response.status, .created)
+                XCTAssertNotNil(app.queues.queue.pop())
+            })
 
-    _ = app.redis.send(command: "FLUSHDB")
-  }
+        _ = app.redis.send(command: "FLUSHDB")
+    }
 
-  private func configureApp(_ app: Application) async throws {
-    try await configure(app)
-    try await app.autoRevert()
-    try await app.autoMigrate()
-  }
+    private func configureApp(_ app: Application) async throws {
+        try await configure(app)
+        try await app.autoRevert()
+        try await app.autoMigrate()
+    }
 }
