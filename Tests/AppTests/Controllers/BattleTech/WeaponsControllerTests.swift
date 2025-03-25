@@ -98,7 +98,5 @@ final class WeaponsControllerTests: XCTestCase {
                 XCTAssertEqual(response.status, .created)
                 XCTAssertNotNil(app.queues.queue.pop())
             })
-
-        _ = app.redis.send(command: "FLUSHDB")
     }
 }

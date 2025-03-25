@@ -7,6 +7,7 @@
 //
 
 import Fluent
+import QueuesFluentDriver
 import Vapor
 
 struct APIMigrations {

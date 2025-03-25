@@ -18,17 +18,17 @@ extension Security {
 
         public var errorDescription: String? {
             switch self {
-                case .passwordsDoNotMatch:
-                    return "Passwords Do Not Match"
+            case .passwordsDoNotMatch:
+                return "Passwords Do Not Match"
 
-                case .cantModifyAdminAsAnAdmin:
-                    return "For safety, can't change the role of an admin as an admin."
+            case .cantModifyAdminAsAnAdmin:
+                return "For safety, can't change the role of an admin as an admin."
 
-                case .userNotActive:
-                    return "User is not currently active."
+            case .userNotActive:
+                return "User is not currently active."
 
-                case .cantEmailUnconfirmedWithoutEmailAddress:
-                    return "Unable to send an email to an unconfirmed address with an unconfirmed email"
+            case .cantEmailUnconfirmedWithoutEmailAddress:
+                return "Unable to send an email to an unconfirmed address with an unconfirmed email"
             }
         }
     }
@@ -112,24 +112,24 @@ extension Security {
 
 extension Security.User {
     final class Profile: Content {
-        var id: UUID?
-        var name: String
-        var firstName: String
-        var lastName: String
-        var username: String
-        var email: String
-        var role: Security.UserRole
-        var createdAt: Date?
+        let id: UUID
+        let name: String
+        let firstName: String
+        let lastName: String
+        let username: String
+        let email: String
+        let role: Security.UserRole
+        let createdAt: Date
 
         init(
-            id: UUID?,
+            id: UUID,
             name: String,
             firstName: String,
             lastName: String,
             username: String,
             email: String,
             role: Security.UserRole,
-            createdAt: Date?
+            createdAt: Date
         ) {
             self.id = id
             self.name = name
@@ -144,26 +144,26 @@ extension Security.User {
 
     func convertToProfile() -> Security.User.Profile {
         Security.User.Profile(
-            id: id,
+            id: id!,
             name: name,
             firstName: firstName ?? "",
             lastName: lastName ?? "",
             username: username,
             email: email,
             role: role,
-            createdAt: createdAt
+            createdAt: createdAt!
         )
     }
 }
 
 extension Security.User {
     final class Public: Content {
-        var id: UUID?
-        var name: String
-        var username: String
-        var role: Security.UserRole
+        let id: UUID
+        let name: String
+        let username: String
+        let role: Security.UserRole
 
-        init(id: UUID?, name: String, username: String, role: Security.UserRole) {
+        init(id: UUID, name: String, username: String, role: Security.UserRole) {
             self.id = id
             self.name = name
             self.username = username
@@ -172,14 +172,15 @@ extension Security.User {
     }
 
     func convertToPublic() -> Security.User.Public {
-        Security.User.Public(id: id, name: name, username: username, role: role)
+        Security.User.Public(id: id!, name: name, username: username, role: role)
     }
 }
 
 extension Security.User {
     func setPassword(_ password: String, confirm passwordConfirmation: String) throws {
         if password != passwordConfirmation {
-            throw Abort(.badRequest, reason: Security.UserError.passwordsDoNotMatch.errorDescription)
+            throw Abort(
+                .badRequest, reason: Security.UserError.passwordsDoNotMatch.errorDescription)
         }
 
         self.password = try Bcrypt.hash(password)
