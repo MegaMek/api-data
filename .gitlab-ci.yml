@@ -36,10 +36,8 @@ test:
     pull_policy: if-not-present
   stage: test
   services:
-    - redis:latest
     - postgres:latest
   variables:
-    REDIS_URL: "redis://redis/1"
     POSTGRES_USER: vapor_username
     POSTGRES_PASSWORD: vapor_password
     POSTGRES_ENABLED: "true"
