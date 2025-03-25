@@ -26,8 +26,8 @@ final class FactionsControllerTests: XCTestCase {
     }
 
     func testIndex() async throws {
-        _ = try await BattleTech.Faction.create(on: app.db(.primary))
-        let factionCount = try await BattleTech.Faction.query(on: app.db(.replica)).count()
+        _ = try await BattleTech.Faction.create(on: app.db)
+        let factionCount = try await BattleTech.Faction.query(on: app.db).count()
 
         try app.test(
             .GET, path,
@@ -39,7 +39,7 @@ final class FactionsControllerTests: XCTestCase {
     }
 
     func testShow() async throws {
-        let faction = try await BattleTech.Faction.create(on: app.db(.primary))
+        let faction = try await BattleTech.Faction.create(on: app.db)
         let showPath = "\(path)/\(faction.id!)"
 
         try app.test(
@@ -63,7 +63,7 @@ final class FactionsControllerTests: XCTestCase {
     }
 
     func testDelete() async throws {
-        let faction = try await BattleTech.Faction.create(on: app.db(.primary))
+        let faction = try await BattleTech.Faction.create(on: app.db)
         let showPath = "\(path)/\(faction.id!)"
 
         try app.test(
@@ -75,7 +75,7 @@ final class FactionsControllerTests: XCTestCase {
     }
 
     func testImport() async throws {
-        let factionCount = try await BattleTech.Faction.query(on: app.db(.replica)).count()
+        let factionCount = try await BattleTech.Faction.query(on: app.db).count()
 
         let (testFileHandle, testFileRegion) = try await app.fileio.openFile(
             path: "Tests/Resources/BattleTech/factions.xml",
@@ -100,7 +100,7 @@ final class FactionsControllerTests: XCTestCase {
                 XCTAssertEqual(response.status, .created)
             })
 
-        let postFactionCount = try await BattleTech.Faction.query(on: app.db(.replica)).count()
+        let postFactionCount = try await BattleTech.Faction.query(on: app.db).count()
         XCTAssertNotEqual(factionCount, postFactionCount)
     }
 
@@ -128,7 +128,7 @@ final class FactionsControllerTests: XCTestCase {
                 XCTAssertEqual(response.status, .created)
             })
 
-        let factionCount = try await BattleTech.Faction.query(on: app.db(.replica)).count()
+        let factionCount = try await BattleTech.Faction.query(on: app.db).count()
 
         try await app.test(
             .POST, massImportPath,
@@ -136,7 +136,7 @@ final class FactionsControllerTests: XCTestCase {
                 try request.content.encode(factionMassImport)
             },
             afterResponse: { response in
-                let postCount = try await BattleTech.Faction.query(on: app.db(.replica)).count()
+                let postCount = try await BattleTech.Faction.query(on: app.db).count()
 
                 XCTAssertEqual(response.status, .created)
                 XCTAssertEqual(factionCount, postCount)

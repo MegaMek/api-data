@@ -32,7 +32,7 @@ final class AmmoImportJobTests: XCTestCase {
             logger: app.logger, on: app.eventLoopGroup.any())
         let csvRow = Importers.AmmoCSVRow(row: data())
         try await job.dequeue(context, csvRow)
-        let count = try await BattleTech.Ammo.query(on: app.db(.replica)).count()
+        let count = try await BattleTech.Ammo.query(on: app.db).count()
         XCTAssertEqual(count, 1)
     }
 
@@ -44,7 +44,7 @@ final class AmmoImportJobTests: XCTestCase {
         let csvRow = Importers.AmmoCSVRow(row: data())
         try await job.dequeue(context, csvRow)
         try await job.dequeue(context, csvRow)
-        let count = try await BattleTech.Ammo.query(on: app.db(.replica)).count()
+        let count = try await BattleTech.Ammo.query(on: app.db).count()
         XCTAssertEqual(count, 1)
     }
 
@@ -75,7 +75,7 @@ final class AmmoImportJobTests: XCTestCase {
             "FALSE",
             "125.0",
             "TRUE",
-            "IS Ammo HVAC/10,ISHVAC10 Ammo,IS Hyper Velocity Autocannon/10 Ammo,Hyper Velocity AC/10 Ammo,"
+            "IS Ammo HVAC/10,ISHVAC10 Ammo,IS Hyper Velocity Autocannon/10 Ammo,Hyper Velocity AC/10 Ammo,",
         ]
     }
 }

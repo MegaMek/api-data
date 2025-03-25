@@ -14,11 +14,10 @@ extension BattleTech {
                 rule.get("equipment", use: equipment).description("Equipment for Rule")
                 rule.get("weapons", use: weapons).description("Weapons for Rule")
             }
-
         }
 
         func index(req: Request) async throws -> [BattleTech.Rule] {
-            try await BattleTech.Rule.query(on: req.db(.replica)).all()
+            try await BattleTech.Rule.query(on: req.db).all()
         }
 
         func show(req: Request) async throws -> BattleTech.Rule {
@@ -27,31 +26,31 @@ extension BattleTech {
 
         func delete(req: Request) async throws -> HTTPStatus {
             let rule = try await getRuleForRequest(req: req)
-            try await rule.delete(on: req.db(.primary))
+            try await rule.delete(on: req.db)
             return .noContent
         }
 
         func ammo(req: Request) async throws -> Page<BattleTech.Ammo> {
             let rule = try await getRuleForRequest(req: req)
-            return try await rule.$ammo.query(on: req.db(.replica)).paginate(for: req)
+            return try await rule.$ammo.query(on: req.db).paginate(for: req)
         }
 
         func equipment(req: Request) async throws -> Page<BattleTech.Equipment> {
             let rule = try await getRuleForRequest(req: req)
-            return try await rule.$equipment.query(on: req.db(.replica)).paginate(for: req)
+            return try await rule.$equipment.query(on: req.db).paginate(for: req)
         }
 
         func weapons(req: Request) async throws -> Page<BattleTech.Weapon> {
             let rule = try await getRuleForRequest(req: req)
-            return try await rule.$weapons.query(on: req.db(.replica)).paginate(for: req)
+            return try await rule.$weapons.query(on: req.db).paginate(for: req)
         }
 
         private func getRuleForRequest(req: Request) async throws -> BattleTech.Rule {
             guard let idString = req.parameters.get("rule_id"),
-                  let ruleUUID = UUID(idString),
-                  let rule = try await BattleTech.Rule.query(on: req.db(.replica))
-                .filter(\.$id == ruleUUID)
-                .first()
+                let ruleUUID = UUID(idString),
+                let rule = try await BattleTech.Rule.query(on: req.db)
+                    .filter(\.$id == ruleUUID)
+                    .first()
             else {
                 throw Abort(.notFound)
             }

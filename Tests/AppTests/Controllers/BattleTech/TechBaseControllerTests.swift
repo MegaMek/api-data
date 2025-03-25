@@ -26,8 +26,8 @@ final class TechBaseControllerTests: XCTestCase {
     }
 
     func testIndex() async throws {
-        _ = try await BattleTech.TechBase.create(on: app.db(.primary))
-        let techBaseCount = try await BattleTech.TechBase.query(on: app.db(.replica)).count()
+        _ = try await BattleTech.TechBase.create(on: app.db)
+        let techBaseCount = try await BattleTech.TechBase.query(on: app.db).count()
 
         try app.test(
             .GET, path,
@@ -39,7 +39,7 @@ final class TechBaseControllerTests: XCTestCase {
     }
 
     func testShow() async throws {
-        let techBase = try await BattleTech.TechBase.create(on: app.db(.primary))
+        let techBase = try await BattleTech.TechBase.create(on: app.db)
         let showPath = "\(path)/\(techBase.id!)"
 
         try app.test(
@@ -63,7 +63,7 @@ final class TechBaseControllerTests: XCTestCase {
     }
 
     func testDelete() async throws {
-        let techBase = try await BattleTech.TechBase.create(on: app.db(.primary))
+        let techBase = try await BattleTech.TechBase.create(on: app.db)
         let showPath = "\(path)/\(techBase.id!)"
 
         try app.test(
@@ -75,7 +75,7 @@ final class TechBaseControllerTests: XCTestCase {
     }
 
     func testAmmo() async throws {
-        let ammo = try await BattleTech.Ammo.create(on: app.db(.primary))
+        let ammo = try await BattleTech.Ammo.create(on: app.db)
         let showPath = "\(path)/\(ammo.$techBase.id)/ammo"
 
         try app.test(
@@ -88,7 +88,7 @@ final class TechBaseControllerTests: XCTestCase {
     }
 
     func testEquipment() async throws {
-        let equipment = try await BattleTech.Equipment.create(on: app.db(.primary))
+        let equipment = try await BattleTech.Equipment.create(on: app.db)
         let showPath = "\(path)/\(equipment.$techBase.id)/equipment"
 
         try app.test(
@@ -101,7 +101,7 @@ final class TechBaseControllerTests: XCTestCase {
     }
 
     func testWeapons() async throws {
-        let weapon = try await BattleTech.Weapon.create(on: app.db(.primary))
+        let weapon = try await BattleTech.Weapon.create(on: app.db)
         let showPath = "\(path)/\(weapon.$techBase.id)/weapons"
 
         try app.test(

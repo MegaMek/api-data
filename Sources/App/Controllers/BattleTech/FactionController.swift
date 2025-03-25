@@ -28,7 +28,7 @@ extension BattleTech {
 
         func delete(req: Request) async throws -> HTTPStatus {
             let faction = try await factionForReq(req: req)
-            try await faction.delete(on: req.db(.primary))
+            try await faction.delete(on: req.db)
             return .noContent
         }
 
@@ -44,17 +44,17 @@ extension BattleTech {
             for faction in factions.faction {
                 let newFaction = try await BattleTech.Faction.findOrNew(
                     importableFaction: faction,
-                    on: req.db(.replica)
+                    on: req.db
                 )
-                try await newFaction.save(on: req.db(.primary))
-                try await newFaction.updateName(importableFaction: faction, on: req.db(.primary))
+                try await newFaction.save(on: req.db)
+                try await newFaction.updateName(importableFaction: faction, on: req.db)
             }
 
             // Link Parents
             for faction in factions.faction {
                 try await BattleTech.Faction.updateParent(
                     importableFaction: faction,
-                    on: req.db(.replica)
+                    on: req.db
                 )
             }
 
@@ -63,13 +63,13 @@ extension BattleTech {
 
         private func factionForReq(req: Request) async throws -> BattleTech.Faction {
             guard let factionIdString = req.parameters.get("faction_id"),
-                  let factionUUID = UUID(factionIdString),
-                  let faction = try await BattleTech.Faction.query(on: req.db(.replica))
-                .with(\.$names)
-                .with(\.$parents)
-                .with(\.$subfactions)
-                .filter(\.$id == factionUUID)
-                .first()
+                let factionUUID = UUID(factionIdString),
+                let faction = try await BattleTech.Faction.query(on: req.db)
+                    .with(\.$names)
+                    .with(\.$parents)
+                    .with(\.$subfactions)
+                    .filter(\.$id == factionUUID)
+                    .first()
             else {
                 throw Abort(.notFound)
             }

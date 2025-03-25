@@ -30,21 +30,22 @@ extension BattleTech {
 
         func delete(req: Request) async throws -> HTTPStatus {
             let ammo = try await ammoForRequest(req: req)
-            try await ammo.$rules.detachAll(on: req.db(.primary))
-            try await ammo.delete(on: req.db(.primary))
+            try await ammo.$rules.detachAll(on: req.db)
+            try await ammo.delete(on: req.db)
             return .noContent
         }
 
         func massCreate(req: Request) async throws -> HTTPStatus {
             let input = try req.content.decode(AmmoMassImport.self)
-            let csvString = String(decoding: Data(buffer: input.file.data), as: UTF8.self)
+            let csvString = String(bytes: Data(buffer: input.file.data), encoding: .utf8) ?? ""
             let csv: CSV = try CSV<Enumerated>(string: csvString)
 
             for row in csv.rows {
                 let csvRow = Importers.AmmoCSVRow(row: row)
                 if csvRow.rulesReference().contains("Unofficial")
                     || csvRow.rulesRaw().contains("Unofficial")
-                    || csvRow.staticTechLevel().contains("Unofficial") {
+                    || csvRow.staticTechLevel().contains("Unofficial")
+                {
                     continue
                 }
 
@@ -56,15 +57,15 @@ extension BattleTech {
 
         private func ammoForRequest(req: Request) async throws -> BattleTech.Ammo {
             guard let ammoIdString = req.parameters.get("ammo_id"),
-                  let ammoUUID = UUID(ammoIdString),
-                  let ammo = try await BattleTech.Ammo.query(on: req.db(.replica))
-                .with(\.$techBase)
-                .with(\.$rules)
-                .with(\.$techLevelStatic)
-                .with(\.$munitionType)
-                .with(\.$aliases)
-                .filter(\.$id == ammoUUID)
-                .first()
+                let ammoUUID = UUID(ammoIdString),
+                let ammo = try await BattleTech.Ammo.query(on: req.db)
+                    .with(\.$techBase)
+                    .with(\.$rules)
+                    .with(\.$techLevelStatic)
+                    .with(\.$munitionType)
+                    .with(\.$aliases)
+                    .filter(\.$id == ammoUUID)
+                    .first()
             else {
                 throw Abort(.notFound)
             }

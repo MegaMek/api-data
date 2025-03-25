@@ -26,8 +26,8 @@ final class TechLevelControllerTests: XCTestCase {
     }
 
     func testIndex() async throws {
-        _ = try await BattleTech.TechLevel.create(on: app.db(.primary))
-        let techLevelCount = try await BattleTech.TechLevel.query(on: app.db(.replica)).count()
+        _ = try await BattleTech.TechLevel.create(on: app.db)
+        let techLevelCount = try await BattleTech.TechLevel.query(on: app.db).count()
 
         try app.test(
             .GET, path,
@@ -39,7 +39,7 @@ final class TechLevelControllerTests: XCTestCase {
     }
 
     func testShow() async throws {
-        let techLevel = try await BattleTech.TechLevel.create(on: app.db(.primary))
+        let techLevel = try await BattleTech.TechLevel.create(on: app.db)
         let showPath = "\(path)/\(techLevel.id!)"
 
         try app.test(
@@ -63,7 +63,7 @@ final class TechLevelControllerTests: XCTestCase {
     }
 
     func testDelete() async throws {
-        let techLevel = try await BattleTech.TechLevel.create(on: app.db(.primary))
+        let techLevel = try await BattleTech.TechLevel.create(on: app.db)
         let showPath = "\(path)/\(techLevel.id!)"
 
         try app.test(
@@ -75,7 +75,7 @@ final class TechLevelControllerTests: XCTestCase {
     }
 
     func testAmmo() async throws {
-        let ammo = try await BattleTech.Ammo.create(on: app.db(.primary))
+        let ammo = try await BattleTech.Ammo.create(on: app.db)
         let showPath = "\(path)/\(ammo.$techLevelStatic.id)/ammo"
 
         try app.test(
@@ -88,7 +88,7 @@ final class TechLevelControllerTests: XCTestCase {
     }
 
     func testEquipment() async throws {
-        let equipment = try await BattleTech.Equipment.create(on: app.db(.primary))
+        let equipment = try await BattleTech.Equipment.create(on: app.db)
         let showPath = "\(path)/\(equipment.$techLevelStatic.id)/equipment"
 
         try app.test(
@@ -101,7 +101,7 @@ final class TechLevelControllerTests: XCTestCase {
     }
 
     func testWeapons() async throws {
-        let weapon = try await BattleTech.Weapon.create(on: app.db(.primary))
+        let weapon = try await BattleTech.Weapon.create(on: app.db)
         let showPath = "\(path)/\(weapon.$techLevelStatic.id)/weapons"
 
         try app.test(

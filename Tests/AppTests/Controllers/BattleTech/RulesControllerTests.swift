@@ -26,8 +26,8 @@ final class RulesControllerTests: XCTestCase {
     }
 
     func testIndex() async throws {
-        _ = try await BattleTech.Rule.create(on: app.db(.primary))
-        let ruleCount = try await BattleTech.Rule.query(on: app.db(.replica)).count()
+        _ = try await BattleTech.Rule.create(on: app.db)
+        let ruleCount = try await BattleTech.Rule.query(on: app.db).count()
 
         try app.test(
             .GET, path,
@@ -39,7 +39,7 @@ final class RulesControllerTests: XCTestCase {
     }
 
     func testShow() async throws {
-        let rule = try await BattleTech.Rule.create(on: app.db(.primary))
+        let rule = try await BattleTech.Rule.create(on: app.db)
         let showPath = "\(path)/\(rule.id!)"
 
         try app.test(
@@ -63,7 +63,7 @@ final class RulesControllerTests: XCTestCase {
     }
 
     func testDelete() async throws {
-        let rule = try await BattleTech.Rule.create(on: app.db(.primary))
+        let rule = try await BattleTech.Rule.create(on: app.db)
         let showPath = "\(path)/\(rule.id!)"
 
         try app.test(
@@ -75,8 +75,8 @@ final class RulesControllerTests: XCTestCase {
     }
 
     func testAmmo() async throws {
-        let ammo = try await BattleTech.Ammo.create(on: app.db(.primary))
-        try await ammo.$rules.load(on: app.db(.primary))
+        let ammo = try await BattleTech.Ammo.create(on: app.db)
+        try await ammo.$rules.load(on: app.db)
         let rule = ammo.rules.first!
 
         let showPath = "\(path)/\(rule.id!)/ammo"
@@ -91,8 +91,8 @@ final class RulesControllerTests: XCTestCase {
     }
 
     func testEquipment() async throws {
-        let equipment = try await BattleTech.Equipment.create(on: app.db(.primary))
-        try await equipment.$rules.load(on: app.db(.primary))
+        let equipment = try await BattleTech.Equipment.create(on: app.db)
+        try await equipment.$rules.load(on: app.db)
         let rule = equipment.rules.first!
 
         let showPath = "\(path)/\(rule.id!)/equipment"
@@ -107,8 +107,8 @@ final class RulesControllerTests: XCTestCase {
     }
 
     func testWeapons() async throws {
-        let weapon = try await BattleTech.Weapon.create(on: app.db(.primary))
-        try await weapon.$rules.load(on: app.db(.primary))
+        let weapon = try await BattleTech.Weapon.create(on: app.db)
+        try await weapon.$rules.load(on: app.db)
         let rule = weapon.rules.first!
 
         let showPath = "\(path)/\(rule.id!)/weapons"

@@ -26,8 +26,8 @@ final class AmmoControllerTests: XCTestCase {
     }
 
     func testIndex() async throws {
-        _ = try await BattleTech.Ammo.create(on: app.db(.primary))
-        let ammoCount = try await BattleTech.Ammo.query(on: app.db(.replica)).count()
+        _ = try await BattleTech.Ammo.create(on: app.db)
+        let ammoCount = try await BattleTech.Ammo.query(on: app.db).count()
 
         try app.test(
             .GET, path,
@@ -39,7 +39,7 @@ final class AmmoControllerTests: XCTestCase {
     }
 
     func testShow() async throws {
-        let ammo = try await BattleTech.Ammo.create(on: app.db(.primary))
+        let ammo = try await BattleTech.Ammo.create(on: app.db)
         let showPath = "\(path)/\(ammo.id!)"
 
         try app.test(
@@ -63,7 +63,7 @@ final class AmmoControllerTests: XCTestCase {
     }
 
     func testDelete() async throws {
-        let ammo = try await BattleTech.Ammo.create(on: app.db(.primary))
+        let ammo = try await BattleTech.Ammo.create(on: app.db)
         let showPath = "\(path)/\(ammo.id!)"
 
         try app.test(
@@ -82,7 +82,8 @@ final class AmmoControllerTests: XCTestCase {
 
         let testFileByteBuffer = try await app.fileio.read(
             fileRegion: testFileRegion, allocator: .init())
-        let ammoMassImport = AmmoMassImport(file: File(data: testFileByteBuffer, filename: "ammo.csv"))
+        let ammoMassImport = AmmoMassImport(
+            file: File(data: testFileByteBuffer, filename: "ammo.csv"))
         try testFileHandle.close()
 
         let massImportPath = "\(path)/import"

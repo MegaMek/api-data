@@ -15,7 +15,7 @@ struct EquipmentImportJob: AsyncJob {
     func dequeue(_ context: QueueContext, _ payload: Importers.EquipmentCSVRow) async throws {
         _ = try await BattleTech.Equipment.findOrCreate(
             csvRow: payload,
-            on: context.application.db(.primary)
+            on: context.application.db
         )
     }
 

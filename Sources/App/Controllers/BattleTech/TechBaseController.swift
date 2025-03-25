@@ -14,11 +14,10 @@ extension BattleTech {
                 base.get("equipment", use: equipment).description("Equipment for Tech Base")
                 base.get("weapons", use: weapons).description("Weapons for Tech Base")
             }
-
         }
 
         func index(req: Request) async throws -> [BattleTech.TechBase] {
-            try await BattleTech.TechBase.query(on: req.db(.replica)).all()
+            try await BattleTech.TechBase.query(on: req.db).all()
         }
 
         func show(req: Request) async throws -> BattleTech.TechBase {
@@ -27,31 +26,31 @@ extension BattleTech {
 
         func delete(req: Request) async throws -> HTTPStatus {
             let techBase = try await getTechBaseForRequest(req: req)
-            try await techBase.delete(on: req.db(.primary))
+            try await techBase.delete(on: req.db)
             return .noContent
         }
 
         func ammo(req: Request) async throws -> Page<BattleTech.Ammo> {
             let techBase = try await getTechBaseForRequest(req: req)
-            return try await techBase.$ammo.query(on: req.db(.replica)).paginate(for: req)
+            return try await techBase.$ammo.query(on: req.db).paginate(for: req)
         }
 
         func equipment(req: Request) async throws -> Page<BattleTech.Equipment> {
             let techBase = try await getTechBaseForRequest(req: req)
-            return try await techBase.$equipment.query(on: req.db(.replica)).paginate(for: req)
+            return try await techBase.$equipment.query(on: req.db).paginate(for: req)
         }
 
         func weapons(req: Request) async throws -> Page<BattleTech.Weapon> {
             let techBase = try await getTechBaseForRequest(req: req)
-            return try await techBase.$weapons.query(on: req.db(.replica)).paginate(for: req)
+            return try await techBase.$weapons.query(on: req.db).paginate(for: req)
         }
 
         private func getTechBaseForRequest(req: Request) async throws -> BattleTech.TechBase {
             guard let idString = req.parameters.get("tech_base_id"),
-                  let techBaseUUID = UUID(idString),
-                  let techBase = try await BattleTech.TechBase.query(on: req.db(.replica))
-                .filter(\.$id == techBaseUUID)
-                .first()
+                let techBaseUUID = UUID(idString),
+                let techBase = try await BattleTech.TechBase.query(on: req.db)
+                    .filter(\.$id == techBaseUUID)
+                    .first()
             else {
                 throw Abort(.notFound)
             }

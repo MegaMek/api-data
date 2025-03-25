@@ -26,21 +26,22 @@ extension BattleTech {
 
         func delete(req: Request) async throws -> HTTPStatus {
             let munitionType = try await getMunitionTypeForRequest(req: req)
-            try await munitionType.delete(on: req.db(.primary))
+            try await munitionType.delete(on: req.db)
             return .noContent
         }
 
         func ammo(req: Request) async throws -> Page<BattleTech.Ammo> {
             let rule = try await getMunitionTypeForRequest(req: req)
-            return try await rule.$ammo.query(on: req.db(.replica)).paginate(for: req)
+            return try await rule.$ammo.query(on: req.db).paginate(for: req)
         }
 
-        private func getMunitionTypeForRequest(req: Request) async throws -> BattleTech.MunitionType {
+        private func getMunitionTypeForRequest(req: Request) async throws -> BattleTech.MunitionType
+        {
             guard let idString = req.parameters.get("munition_type_id"),
-                  let munitionTypeUUID = UUID(idString),
-                  let munitionType = try await BattleTech.MunitionType.query(on: req.db(.replica))
-                .filter(\.$id == munitionTypeUUID)
-                .first()
+                let munitionTypeUUID = UUID(idString),
+                let munitionType = try await BattleTech.MunitionType.query(on: req.db)
+                    .filter(\.$id == munitionTypeUUID)
+                    .first()
             else {
                 throw Abort(.notFound)
             }

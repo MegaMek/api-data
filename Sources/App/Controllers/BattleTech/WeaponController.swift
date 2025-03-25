@@ -29,8 +29,8 @@ extension BattleTech {
 
         func delete(req: Request) async throws -> HTTPStatus {
             let weapon = try await weaponForRequest(req: req)
-            try await weapon.$rules.detachAll(on: req.db(.primary))
-            try await weapon.delete(on: req.db(.primary))
+            try await weapon.$rules.detachAll(on: req.db)
+            try await weapon.delete(on: req.db)
             return .noContent
         }
 
@@ -43,7 +43,8 @@ extension BattleTech {
                 let csvRow = Importers.WeaponCSVRow(row: row)
                 if csvRow.rulesReference().contains("Unofficial")
                     || csvRow.rulesRaw().contains("Unofficial")
-                    || csvRow.staticTechLevel().contains("Unofficial") {
+                    || csvRow.staticTechLevel().contains("Unofficial")
+                {
                     continue
                 }
 
@@ -55,14 +56,14 @@ extension BattleTech {
 
         private func weaponForRequest(req: Request) async throws -> BattleTech.Weapon {
             guard let weaponIdString = req.parameters.get("weapon_id"),
-                  let weaponUUID = UUID(weaponIdString),
-                  let weapon = try await BattleTech.Weapon.query(on: req.db(.replica))
-                .with(\.$techBase)
-                .with(\.$rules)
-                .with(\.$techLevelStatic)
-                .with(\.$aliases)
-                .filter(\.$id == weaponUUID)
-                .first()
+                let weaponUUID = UUID(weaponIdString),
+                let weapon = try await BattleTech.Weapon.query(on: req.db)
+                    .with(\.$techBase)
+                    .with(\.$rules)
+                    .with(\.$techLevelStatic)
+                    .with(\.$aliases)
+                    .filter(\.$id == weaponUUID)
+                    .first()
             else {
                 throw Abort(.notFound)
             }

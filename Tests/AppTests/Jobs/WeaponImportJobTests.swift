@@ -32,7 +32,7 @@ final class WeaponImportJobTests: XCTestCase {
             logger: app.logger, on: app.eventLoopGroup.any())
         let csvRow = Importers.WeaponCSVRow(row: data())
         try await job.dequeue(context, csvRow)
-        let count = try await BattleTech.Weapon.query(on: app.db(.replica)).count()
+        let count = try await BattleTech.Weapon.query(on: app.db).count()
         XCTAssertEqual(count, 1)
     }
 
@@ -44,7 +44,7 @@ final class WeaponImportJobTests: XCTestCase {
         let csvRow = Importers.WeaponCSVRow(row: data())
         try await job.dequeue(context, csvRow)
         try await job.dequeue(context, csvRow)
-        let count = try await BattleTech.Weapon.query(on: app.db(.replica)).count()
+        let count = try await BattleTech.Weapon.query(on: app.db).count()
         XCTAssertEqual(count, 1)
     }
 
@@ -80,7 +80,7 @@ final class WeaponImportJobTests: XCTestCase {
             "12",
             "12",
             "12",
-            "Bombast Laser,IS Bombast Laser,ISBombastLaser,"
+            "Bombast Laser,IS Bombast Laser,ISBombastLaser,",
 
         ]
     }

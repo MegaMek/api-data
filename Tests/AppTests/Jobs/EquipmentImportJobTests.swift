@@ -32,7 +32,7 @@ final class EquipmentImportJobTests: XCTestCase {
             logger: app.logger, on: app.eventLoopGroup.any())
         let csvRow = Importers.EquipmentCSVRow(row: data())
         try await job.dequeue(context, csvRow)
-        let count = try await BattleTech.Equipment.query(on: app.db(.replica)).count()
+        let count = try await BattleTech.Equipment.query(on: app.db).count()
         XCTAssertEqual(count, 1)
     }
 
@@ -44,7 +44,7 @@ final class EquipmentImportJobTests: XCTestCase {
         let csvRow = Importers.EquipmentCSVRow(row: data())
         try await job.dequeue(context, csvRow)
         try await job.dequeue(context, csvRow)
-        let count = try await BattleTech.Equipment.query(on: app.db(.replica)).count()
+        let count = try await BattleTech.Equipment.query(on: app.db).count()
         XCTAssertEqual(count, 1)
     }
 
@@ -66,7 +66,7 @@ final class EquipmentImportJobTests: XCTestCase {
             "500000.0",
             "0.0",
             "298, TO",
-            "ISC3BoostedSystemSlaveUnit,IS C3 Boosted System Slave,C3 Boosted System (C3BS) [Slave],"
+            "ISC3BoostedSystemSlaveUnit,IS C3 Boosted System Slave,C3 Boosted System (C3BS) [Slave],",
         ]
     }
 }

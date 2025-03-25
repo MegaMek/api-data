@@ -23,16 +23,16 @@ import Vapor
 extension Security.User {
     func active() -> Bool {
         switch self.role {
-            case .banned, .deactivated, .nonConfirmed:
-                return false
-            default:
-                return true
+        case .banned, .deactivated, .nonConfirmed:
+            return false
+        default:
+            return true
         }
     }
 
     func ensureUnique(_ req: Request) async throws {
         guard
-            try await Security.User.query(on: req.db(.replica))
+            try await Security.User.query(on: req.db)
                 .group(
                     .or,
                     { group in
@@ -47,47 +47,47 @@ extension Security.User {
 
     func isSubscriber() -> Bool {
         switch self.role {
-            case .subscriber, .demoAgent, .contentManagement, .developer, .administrator,
-                    .superAdministrator:
-                return true
-            default:
-                return false
+        case .subscriber, .demoAgent, .contentManagement, .developer, .administrator,
+            .superAdministrator:
+            return true
+        default:
+            return false
         }
     }
 
     func isDemoAgent() -> Bool {
         switch self.role {
-            case .demoAgent, .contentManagement, .developer, .administrator, .superAdministrator:
-                return true
-            default:
-                return false
+        case .demoAgent, .contentManagement, .developer, .administrator, .superAdministrator:
+            return true
+        default:
+            return false
         }
     }
 
     func isContentManagement() -> Bool {
         switch self.role {
-            case .contentManagement, .developer, .administrator, .superAdministrator:
-                return true
-            default:
-                return false
+        case .contentManagement, .developer, .administrator, .superAdministrator:
+            return true
+        default:
+            return false
         }
     }
 
     func isDeveloper() -> Bool {
         switch self.role {
-            case .developer, .administrator, .superAdministrator:
-                return true
-            default:
-                return false
+        case .developer, .administrator, .superAdministrator:
+            return true
+        default:
+            return false
         }
     }
 
     func isAdministrator() -> Bool {
         switch self.role {
-            case .administrator, .superAdministrator:
-                return true
-            default:
-                return false
+        case .administrator, .superAdministrator:
+            return true
+        default:
+            return false
         }
     }
 }

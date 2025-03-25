@@ -27,8 +27,8 @@ final class ErasControllerTests: XCTestCase {
     }
 
     func testIndex() async throws {
-        _ = try await BattleTech.Era.create(on: app.db(.primary))
-        let eraCount = try await BattleTech.Era.query(on: app.db(.replica)).count()
+        _ = try await BattleTech.Era.create(on: app.db)
+        let eraCount = try await BattleTech.Era.query(on: app.db).count()
 
         try app.test(
             .GET, path,
@@ -40,7 +40,7 @@ final class ErasControllerTests: XCTestCase {
     }
 
     func testShow() async throws {
-        let era = try await BattleTech.Era.create(on: app.db(.primary))
+        let era = try await BattleTech.Era.create(on: app.db)
         let showPath = "\(path)/\(era.id!)"
 
         try app.test(
@@ -64,7 +64,7 @@ final class ErasControllerTests: XCTestCase {
     }
 
     func testDelete() async throws {
-        let era = try await BattleTech.Era.create(on: app.db(.primary))
+        let era = try await BattleTech.Era.create(on: app.db)
         let showPath = "\(path)/\(era.id!)"
 
         try app.test(
@@ -76,7 +76,7 @@ final class ErasControllerTests: XCTestCase {
     }
 
     func testImport() async throws {
-        let eraCount = try await BattleTech.Era.query(on: app.db(.replica)).count()
+        let eraCount = try await BattleTech.Era.query(on: app.db).count()
 
         let (testFileHandle, testFileRegion) = try await app.fileio.openFile(
             path: "Tests/Resources/BattleTech/eras.xml",
@@ -85,7 +85,8 @@ final class ErasControllerTests: XCTestCase {
 
         let testFileByteBuffer = try await app.fileio.read(
             fileRegion: testFileRegion, allocator: .init())
-        let eraMassImport = EraMassImport(file: File(data: testFileByteBuffer, filename: "eras.xml"))
+        let eraMassImport = EraMassImport(
+            file: File(data: testFileByteBuffer, filename: "eras.xml"))
         try testFileHandle.close()
 
         let massImportPath = "\(path)/import"
@@ -100,7 +101,7 @@ final class ErasControllerTests: XCTestCase {
                 XCTAssertEqual(response.status, .created)
             })
 
-        let postEraCount = try await BattleTech.Era.query(on: app.db(.replica)).count()
+        let postEraCount = try await BattleTech.Era.query(on: app.db).count()
         XCTAssertNotEqual(eraCount, postEraCount)
     }
 
@@ -112,7 +113,8 @@ final class ErasControllerTests: XCTestCase {
 
         let testFileByteBuffer = try await app.fileio.read(
             fileRegion: testFileRegion, allocator: .init())
-        let eraMassImport = EraMassImport(file: File(data: testFileByteBuffer, filename: "eras.xml"))
+        let eraMassImport = EraMassImport(
+            file: File(data: testFileByteBuffer, filename: "eras.xml"))
         try testFileHandle.close()
 
         let massImportPath = "\(path)/import"
@@ -127,7 +129,7 @@ final class ErasControllerTests: XCTestCase {
                 XCTAssertEqual(response.status, .created)
             })
 
-        let eraCount = try await BattleTech.Era.query(on: app.db(.replica)).count()
+        let eraCount = try await BattleTech.Era.query(on: app.db).count()
 
         try await app.test(
             .POST, massImportPath,
@@ -135,7 +137,7 @@ final class ErasControllerTests: XCTestCase {
                 try request.content.encode(eraMassImport)
             },
             afterResponse: { response in
-                let postCount = try await BattleTech.Era.query(on: app.db(.replica)).count()
+                let postCount = try await BattleTech.Era.query(on: app.db).count()
 
                 XCTAssertEqual(response.status, .created)
                 XCTAssertEqual(eraCount, postCount)

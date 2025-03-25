@@ -26,8 +26,8 @@ final class MunitionTypesControllerTests: XCTestCase {
     }
 
     func testIndex() async throws {
-        _ = try await BattleTech.MunitionType.create(on: app.db(.primary))
-        let munitionTypeCount = try await BattleTech.MunitionType.query(on: app.db(.replica)).count()
+        _ = try await BattleTech.MunitionType.create(on: app.db)
+        let munitionTypeCount = try await BattleTech.MunitionType.query(on: app.db).count()
 
         try app.test(
             .GET, path,
@@ -39,7 +39,7 @@ final class MunitionTypesControllerTests: XCTestCase {
     }
 
     func testShow() async throws {
-        let munitionType = try await BattleTech.MunitionType.create(on: app.db(.primary))
+        let munitionType = try await BattleTech.MunitionType.create(on: app.db)
         let showPath = "\(path)/\(munitionType.id!)"
 
         try app.test(
@@ -63,7 +63,7 @@ final class MunitionTypesControllerTests: XCTestCase {
     }
 
     func testDelete() async throws {
-        let munitionType = try await BattleTech.MunitionType.create(on: app.db(.primary))
+        let munitionType = try await BattleTech.MunitionType.create(on: app.db)
         let showPath = "\(path)/\(munitionType.id!)"
 
         try app.test(
@@ -75,7 +75,7 @@ final class MunitionTypesControllerTests: XCTestCase {
     }
 
     func testAmmo() async throws {
-        let ammo = try await BattleTech.Ammo.create(on: app.db(.primary))
+        let ammo = try await BattleTech.Ammo.create(on: app.db)
         let showPath = "\(path)/\(ammo.$munitionType.id)/ammo"
 
         try app.test(

@@ -26,8 +26,8 @@ final class WeaponsControllerTests: XCTestCase {
     }
 
     func testIndex() async throws {
-        _ = try await BattleTech.Weapon.create(on: app.db(.primary))
-        let weaponCount = try await BattleTech.Weapon.query(on: app.db(.replica)).count()
+        _ = try await BattleTech.Weapon.create(on: app.db)
+        let weaponCount = try await BattleTech.Weapon.query(on: app.db).count()
 
         try app.test(
             .GET, path,
@@ -39,7 +39,7 @@ final class WeaponsControllerTests: XCTestCase {
     }
 
     func testShow() async throws {
-        let weapon = try await BattleTech.Weapon.create(on: app.db(.primary))
+        let weapon = try await BattleTech.Weapon.create(on: app.db)
         let showPath = "\(path)/\(weapon.id!)"
 
         try app.test(
@@ -63,7 +63,7 @@ final class WeaponsControllerTests: XCTestCase {
     }
 
     func testDelete() async throws {
-        let weapon = try await BattleTech.Weapon.create(on: app.db(.primary))
+        let weapon = try await BattleTech.Weapon.create(on: app.db)
         let showPath = "\(path)/\(weapon.id!)"
 
         try app.test(

@@ -26,7 +26,7 @@ extension BattleTech {
 
         func delete(req: Request) async throws -> HTTPStatus {
             let era = try await eraForReq(req: req)
-            try await era.delete(on: req.db(.primary))
+            try await era.delete(on: req.db)
             return .noContent
         }
 
@@ -34,7 +34,7 @@ extension BattleTech {
             let input = try req.content.decode(EraMassImport.self)
             let decoder = XMLDecoder()
 
-            let xmlString = String(decoding: Data(buffer: input.file.data), as: UTF8.self)
+            let xmlString = String(bytes: Data(buffer: input.file.data), encoding: .utf8) ?? ""
             let eras = try decoder.decode(Importers.Eras.self, from: xmlString.data(using: .utf8)!)
             let sortedEras = eras.era.sorted { ($0.end ?? 9999) < ($1.end ?? 9999) }
             var startYear = -1
@@ -42,9 +42,9 @@ extension BattleTech {
                 let newEra = try await BattleTech.Era.findOrNew(
                     importableEra: era,
                     startYear: startYear + 1,
-                    on: req.db(.replica)
+                    on: req.db
                 )
-                try await newEra.save(on: req.db(.primary))
+                try await newEra.save(on: req.db)
                 startYear = era.end ?? 9999
             }
 
@@ -53,10 +53,10 @@ extension BattleTech {
 
         private func eraForReq(req: Request) async throws -> BattleTech.Era {
             guard let eraIdString = req.parameters.get("era_id"),
-                  let eraUUID = UUID(eraIdString),
-                  let era = try await BattleTech.Era.query(on: req.db(.replica))
-                .filter(\.$id == eraUUID)
-                .first()
+                let eraUUID = UUID(eraIdString),
+                let era = try await BattleTech.Era.query(on: req.db)
+                    .filter(\.$id == eraUUID)
+                    .first()
             else {
                 throw Abort(.notFound)
             }
