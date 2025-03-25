@@ -7,15 +7,14 @@ let package = Package(
     .macOS(.v13)
   ],
   dependencies: [
-    .package(url: "https://github.com/vapor/vapor.git", from: "4.105.2"),
-    .package(url: "https://github.com/vapor/fluent.git", from: "4.11.0"),
-    .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.9.2"),
-    .package(url: "https://github.com/vapor/leaf.git", from: "4.4.0"),
+    .package(url: "https://github.com/vapor/vapor.git", from: "4.114.0"),
+    .package(url: "https://github.com/vapor/fluent.git", from: "4.12.0"),
+    .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.10.0"),
+    .package(url: "https://github.com/vapor/leaf.git", from: "4.4.1"),
     .package(url: "https://github.com/CoreOffice/XMLCoder.git", from: "0.17.1"),
-    .package(url: "https://github.com/vapor/redis.git", from: "4.11.0"),
     .package(url: "https://github.com/swiftcsv/SwiftCSV.git", from: "0.10.0"),
-    .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.1.2"),
-    .package(url: "https://github.com/apple/swift-nio.git", from: "2.74.0"),
+    .package(url: "https://github.com/apple/swift-nio.git", from: "2.81.0"),
+    .package(url: "https://github.com/vapor-community/vapor-queues-fluent-driver.git", from: "3.0.0-beta.4"),
   ],
   targets: [
     .executableTarget(
@@ -26,11 +25,10 @@ let package = Package(
         .product(name: "Leaf", package: "leaf"),
         .product(name: "Vapor", package: "vapor"),
         .product(name: "XMLCoder", package: "XMLCoder"),
-        .product(name: "Redis", package: "Redis"),
         .product(name: "SwiftCSV", package: "SwiftCSV"),
-        .product(name: "QueuesRedisDriver", package: "queues-redis-driver"),
         .product(name: "NIOCore", package: "swift-nio"),
         .product(name: "NIOPosix", package: "swift-nio"),
+        .product(name: "QueuesFluentDriver", package: "vapor-queues-fluent-driver"),
       ]
     ),
     .testTarget(

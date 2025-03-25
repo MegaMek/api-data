@@ -10,7 +10,7 @@ import XCTVapor
 @testable import App
 
 final class TechBaseControllerTests: XCTestCase {
-  var path = "/battletech/tech-bases"
+    var path = "/battletech/tech-bases"
     var app: Application!
 
     override func setUp() async throws {
@@ -25,91 +25,91 @@ final class TechBaseControllerTests: XCTestCase {
         self.app = nil
     }
 
-  func testIndex() async throws {
-    _ = try await BattleTech.TechBase.create(on: app.db(.primary))
-    let techBaseCount = try await BattleTech.TechBase.query(on: app.db(.replica)).count()
+    func testIndex() async throws {
+        _ = try await BattleTech.TechBase.create(on: app.db(.primary))
+        let techBaseCount = try await BattleTech.TechBase.query(on: app.db(.replica)).count()
 
-    try app.test(
-      .GET, path,
-      loggedInRequest: false,
-      afterResponse: { response in
-        let techBases = try response.content.decode([BattleTech.TechBase].self)
-        XCTAssertEqual(techBases.count, techBaseCount)
-      })
-  }
+        try app.test(
+            .GET, path,
+            loggedInRequest: false,
+            afterResponse: { response in
+                let techBases = try response.content.decode([BattleTech.TechBase].self)
+                XCTAssertEqual(techBases.count, techBaseCount)
+            })
+    }
 
-  func testShow() async throws {
-    let techBase = try await BattleTech.TechBase.create(on: app.db(.primary))
-    let showPath = "\(path)/\(techBase.id!)"
+    func testShow() async throws {
+        let techBase = try await BattleTech.TechBase.create(on: app.db(.primary))
+        let showPath = "\(path)/\(techBase.id!)"
 
-    try app.test(
-      .GET, showPath,
-      loggedInRequest: false,
-      afterResponse: { response in
-        let returnedTechBase = try response.content.decode(BattleTech.TechBase.self)
-        XCTAssertEqual(techBase.name, returnedTechBase.name)
-      })
-  }
+        try app.test(
+            .GET, showPath,
+            loggedInRequest: false,
+            afterResponse: { response in
+                let returnedTechBase = try response.content.decode(BattleTech.TechBase.self)
+                XCTAssertEqual(techBase.name, returnedTechBase.name)
+            })
+    }
 
-  func testShowNotFound() async throws {
-    let notFoundPath = "\(path)/NOT-A-UUID"
+    func testShowNotFound() async throws {
+        let notFoundPath = "\(path)/NOT-A-UUID"
 
-    try app.test(
-      .GET, notFoundPath,
-      loggedInRequest: false,
-      afterResponse: { response in
-        XCTAssertEqual(response.status, .notFound)
-      })
-  }
+        try app.test(
+            .GET, notFoundPath,
+            loggedInRequest: false,
+            afterResponse: { response in
+                XCTAssertEqual(response.status, .notFound)
+            })
+    }
 
-  func testDelete() async throws {
-    let techBase = try await BattleTech.TechBase.create(on: app.db(.primary))
-    let showPath = "\(path)/\(techBase.id!)"
+    func testDelete() async throws {
+        let techBase = try await BattleTech.TechBase.create(on: app.db(.primary))
+        let showPath = "\(path)/\(techBase.id!)"
 
-    try app.test(
-      .DELETE, showPath,
-      loggedInRequest: false,
-      afterResponse: { response in
-        XCTAssertEqual(response.status, .noContent)
-      })
-  }
+        try app.test(
+            .DELETE, showPath,
+            loggedInRequest: false,
+            afterResponse: { response in
+                XCTAssertEqual(response.status, .noContent)
+            })
+    }
 
-  func testAmmo() async throws {
-    let ammo = try await BattleTech.Ammo.create(on: app.db(.primary))
-    let showPath = "\(path)/\(ammo.$techBase.id)/ammo"
+    func testAmmo() async throws {
+        let ammo = try await BattleTech.Ammo.create(on: app.db(.primary))
+        let showPath = "\(path)/\(ammo.$techBase.id)/ammo"
 
-    try app.test(
-      .GET, showPath,
-      loggedInRequest: false,
-      afterResponse: { response in
-        let returnedAmmo = try response.content.decode(Page<BattleTech.Ammo>.self)
-        XCTAssertEqual(1, returnedAmmo.metadata.total)
-      })
-  }
+        try app.test(
+            .GET, showPath,
+            loggedInRequest: false,
+            afterResponse: { response in
+                let returnedAmmo = try response.content.decode(Page<BattleTech.Ammo>.self)
+                XCTAssertEqual(1, returnedAmmo.metadata.total)
+            })
+    }
 
-  func testEquipment() async throws {
-    let equipment = try await BattleTech.Equipment.create(on: app.db(.primary))
-    let showPath = "\(path)/\(equipment.$techBase.id)/equipment"
+    func testEquipment() async throws {
+        let equipment = try await BattleTech.Equipment.create(on: app.db(.primary))
+        let showPath = "\(path)/\(equipment.$techBase.id)/equipment"
 
-    try app.test(
-      .GET, showPath,
-      loggedInRequest: false,
-      afterResponse: { response in
-        let returnedEquipment = try response.content.decode(Page<BattleTech.Equipment>.self)
-        XCTAssertEqual(1, returnedEquipment.metadata.total)
-      })
-  }
+        try app.test(
+            .GET, showPath,
+            loggedInRequest: false,
+            afterResponse: { response in
+                let returnedEquipment = try response.content.decode(Page<BattleTech.Equipment>.self)
+                XCTAssertEqual(1, returnedEquipment.metadata.total)
+            })
+    }
 
-  func testWeapons() async throws {
-    let weapon = try await BattleTech.Weapon.create(on: app.db(.primary))
-    let showPath = "\(path)/\(weapon.$techBase.id)/weapons"
+    func testWeapons() async throws {
+        let weapon = try await BattleTech.Weapon.create(on: app.db(.primary))
+        let showPath = "\(path)/\(weapon.$techBase.id)/weapons"
 
-    try app.test(
-      .GET, showPath,
-      loggedInRequest: false,
-      afterResponse: { response in
-        let returnedWeapons = try response.content.decode(Page<BattleTech.Weapon>.self)
-        XCTAssertEqual(1, returnedWeapons.metadata.total)
-      })
-  }
+        try app.test(
+            .GET, showPath,
+            loggedInRequest: false,
+            afterResponse: { response in
+                let returnedWeapons = try response.content.decode(Page<BattleTech.Weapon>.self)
+                XCTAssertEqual(1, returnedWeapons.metadata.total)
+            })
+    }
 }

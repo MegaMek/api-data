@@ -2,19 +2,19 @@ import Fluent
 import Vapor
 
 extension BattleTech {
-  final class RuleWeaponPivot: Model, Content, @unchecked Sendable {
-    static let schema = BattleTech.RuleWeaponPivot.V20240316.schemaName
-    public static let space: String? = BattleTech.RuleWeaponPivot.V20240316.spaceName
+    final class RuleWeaponPivot: Model, Content, @unchecked Sendable {
+        static let schema = BattleTech.RuleWeaponPivot.V20240316.schemaName
+        public static let space: String? = BattleTech.RuleWeaponPivot.V20240316.spaceName
 
-    @ID(key: .id)
-    var id: UUID?
+        @ID(key: .id)
+        var id: UUID?
 
-    @Parent(key: BattleTech.RuleWeaponPivot.V20240316.rule)
-    var rule: BattleTech.Rule
+        @Parent(key: BattleTech.RuleWeaponPivot.V20240316.rule)
+        var rule: BattleTech.Rule
 
-    @Parent(key: BattleTech.RuleWeaponPivot.V20240316.weapon)
-    var weapon: BattleTech.Weapon
+        @Parent(key: BattleTech.RuleWeaponPivot.V20240316.weapon)
+        var weapon: BattleTech.Weapon
 
-    init() {}
-  }
+        init() {}
+    }
 }

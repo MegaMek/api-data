@@ -9,18 +9,18 @@
 import Vapor
 
 struct ForgotPasswordDTO: Codable, Content {
-  var email: String
-  var url: String
+    var email: String
+    var url: String
 }
 
 struct ForgotPasswordContext: Encodable {
-  var resetToken: String
-  var remoteURL: String
-  var user: Security.User
+    var resetToken: String
+    var remoteURL: String
+    var user: Security.User
 }
 
 struct ForgotPasswordResetDTO: Codable, Content {
-  var resetToken: String
-  var password: String
-  var passwordConfirmation: String
+    var resetToken: String
+    var password: String
+    var passwordConfirmation: String
 }

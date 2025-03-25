@@ -10,23 +10,23 @@ import Fluent
 import FluentSQL
 
 extension Security {
-  struct AddUnconfirmedEmailToUser: AsyncMigration {
-    func prepare(on database: any Database) async throws {
-      try await database.schema(for: Security.User.self)
-        .field(Security.User.V20230818A.unconfirmedEmail, .string)
-        .update()
-    }
+    struct AddUnconfirmedEmailToUser: AsyncMigration {
+        func prepare(on database: any Database) async throws {
+            try await database.schema(for: Security.User.self)
+                .field(Security.User.V20230818A.unconfirmedEmail, .string)
+                .update()
+        }
 
-    func revert(on database: any Database) async throws {
-      try await database.schema(for: Security.User.self)
-        .deleteField(Security.User.V20230818A.unconfirmedEmail)
-        .update()
+        func revert(on database: any Database) async throws {
+            try await database.schema(for: Security.User.self)
+                .deleteField(Security.User.V20230818A.unconfirmedEmail)
+                .update()
+        }
     }
-  }
 }
 
 extension Security.User {
-  enum V20230818A {
-    static let unconfirmedEmail = FieldKey(stringLiteral: "unconfirmed_email")
-  }
+    enum V20230818A {
+        static let unconfirmedEmail = FieldKey(stringLiteral: "unconfirmed_email")
+    }
 }

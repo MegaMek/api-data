@@ -10,7 +10,7 @@ import XCTVapor
 @testable import App
 
 final class RulesControllerTests: XCTestCase {
-  var path = "/battletech/rules"
+    var path = "/battletech/rules"
     var app: Application!
 
     override func setUp() async throws {
@@ -25,100 +25,100 @@ final class RulesControllerTests: XCTestCase {
         self.app = nil
     }
 
-  func testIndex() async throws {
-    _ = try await BattleTech.Rule.create(on: app.db(.primary))
-    let ruleCount = try await BattleTech.Rule.query(on: app.db(.replica)).count()
+    func testIndex() async throws {
+        _ = try await BattleTech.Rule.create(on: app.db(.primary))
+        let ruleCount = try await BattleTech.Rule.query(on: app.db(.replica)).count()
 
-    try app.test(
-      .GET, path,
-      loggedInRequest: false,
-      afterResponse: { response in
-        let rules = try response.content.decode([BattleTech.Rule].self)
-        XCTAssertEqual(rules.count, ruleCount)
-      })
-  }
+        try app.test(
+            .GET, path,
+            loggedInRequest: false,
+            afterResponse: { response in
+                let rules = try response.content.decode([BattleTech.Rule].self)
+                XCTAssertEqual(rules.count, ruleCount)
+            })
+    }
 
-  func testShow() async throws {
-    let rule = try await BattleTech.Rule.create(on: app.db(.primary))
-    let showPath = "\(path)/\(rule.id!)"
+    func testShow() async throws {
+        let rule = try await BattleTech.Rule.create(on: app.db(.primary))
+        let showPath = "\(path)/\(rule.id!)"
 
-    try app.test(
-      .GET, showPath,
-      loggedInRequest: false,
-      afterResponse: { response in
-        let returnedRule = try response.content.decode(BattleTech.Rule.self)
-        XCTAssertEqual(rule.name, returnedRule.name)
-      })
-  }
+        try app.test(
+            .GET, showPath,
+            loggedInRequest: false,
+            afterResponse: { response in
+                let returnedRule = try response.content.decode(BattleTech.Rule.self)
+                XCTAssertEqual(rule.name, returnedRule.name)
+            })
+    }
 
-  func testShowNotFound() async throws {
-    let notFoundPath = "\(path)/NOT-A-UUID"
+    func testShowNotFound() async throws {
+        let notFoundPath = "\(path)/NOT-A-UUID"
 
-    try app.test(
-      .GET, notFoundPath,
-      loggedInRequest: false,
-      afterResponse: { response in
-        XCTAssertEqual(response.status, .notFound)
-      })
-  }
+        try app.test(
+            .GET, notFoundPath,
+            loggedInRequest: false,
+            afterResponse: { response in
+                XCTAssertEqual(response.status, .notFound)
+            })
+    }
 
-  func testDelete() async throws {
-    let rule = try await BattleTech.Rule.create(on: app.db(.primary))
-    let showPath = "\(path)/\(rule.id!)"
+    func testDelete() async throws {
+        let rule = try await BattleTech.Rule.create(on: app.db(.primary))
+        let showPath = "\(path)/\(rule.id!)"
 
-    try app.test(
-      .DELETE, showPath,
-      loggedInRequest: false,
-      afterResponse: { response in
-        XCTAssertEqual(response.status, .noContent)
-      })
-  }
+        try app.test(
+            .DELETE, showPath,
+            loggedInRequest: false,
+            afterResponse: { response in
+                XCTAssertEqual(response.status, .noContent)
+            })
+    }
 
-  func testAmmo() async throws {
-    let ammo = try await BattleTech.Ammo.create(on: app.db(.primary))
-    try await ammo.$rules.load(on: app.db(.primary))
-    let rule = ammo.rules.first!
+    func testAmmo() async throws {
+        let ammo = try await BattleTech.Ammo.create(on: app.db(.primary))
+        try await ammo.$rules.load(on: app.db(.primary))
+        let rule = ammo.rules.first!
 
-    let showPath = "\(path)/\(rule.id!)/ammo"
+        let showPath = "\(path)/\(rule.id!)/ammo"
 
-    try app.test(
-      .GET, showPath,
-      loggedInRequest: false,
-      afterResponse: { response in
-        let returnedAmmo = try response.content.decode(Page<BattleTech.Ammo>.self)
-        XCTAssertEqual(1, returnedAmmo.metadata.total)
-      })
-  }
+        try app.test(
+            .GET, showPath,
+            loggedInRequest: false,
+            afterResponse: { response in
+                let returnedAmmo = try response.content.decode(Page<BattleTech.Ammo>.self)
+                XCTAssertEqual(1, returnedAmmo.metadata.total)
+            })
+    }
 
-  func testEquipment() async throws {
-    let equipment = try await BattleTech.Equipment.create(on: app.db(.primary))
-    try await equipment.$rules.load(on: app.db(.primary))
-    let rule = equipment.rules.first!
+    func testEquipment() async throws {
+        let equipment = try await BattleTech.Equipment.create(on: app.db(.primary))
+        try await equipment.$rules.load(on: app.db(.primary))
+        let rule = equipment.rules.first!
 
-    let showPath = "\(path)/\(rule.id!)/equipment"
+        let showPath = "\(path)/\(rule.id!)/equipment"
 
-    try app.test(
-      .GET, showPath,
-      loggedInRequest: false,
-      afterResponse: { response in
-        let returnedEquipment = try response.content.decode(Page<BattleTech.Equipment>.self)
-        XCTAssertEqual(1, returnedEquipment.metadata.total)
-      })
-  }
+        try app.test(
+            .GET, showPath,
+            loggedInRequest: false,
+            afterResponse: { response in
+                let returnedEquipment = try response.content.decode(Page<BattleTech.Equipment>.self)
+                XCTAssertEqual(1, returnedEquipment.metadata.total)
+            })
+    }
 
-  func testWeapons() async throws {
-    let weapon = try await BattleTech.Weapon.create(on: app.db(.primary))
-    try await weapon.$rules.load(on: app.db(.primary))
-    let rule = weapon.rules.first!
+    func testWeapons() async throws {
+        let weapon = try await BattleTech.Weapon.create(on: app.db(.primary))
+        try await weapon.$rules.load(on: app.db(.primary))
+        let rule = weapon.rules.first!
 
-    let showPath = "\(path)/\(rule.id!)/weapons"
+        let showPath = "\(path)/\(rule.id!)/weapons"
 
-    try app.test(
-      .GET, showPath,
-      loggedInRequest: false,
-      afterResponse: { response in
-        let returnedWeapons = try response.content.decode(Page<BattleTech.Weapon>.self)
-        XCTAssertEqual(1, returnedWeapons.metadata.total)
-      })
-  }
+        try app.test(
+            .GET, showPath,
+            loggedInRequest: false,
+            afterResponse: { response in
+                let returnedWeapons = try response.content.decode(Page<BattleTech.Weapon>.self)
+                XCTAssertEqual(1, returnedWeapons.metadata.total)
+            })
+    }
 }

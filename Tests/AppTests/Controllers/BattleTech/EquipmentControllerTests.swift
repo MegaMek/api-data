@@ -11,7 +11,7 @@ import XCTVapor
 
 final class EquipmentControllerTests: XCTestCase {
     var app: Application!
-  var path = "/battletech/equipment"
+    var path = "/battletech/equipment"
 
     override func setUp() async throws {
         self.app = try await Application.make(.testing)
@@ -25,80 +25,80 @@ final class EquipmentControllerTests: XCTestCase {
         self.app = nil
     }
 
-  func testIndex() async throws {
-    _ = try await BattleTech.Equipment.create(on: app.db(.primary))
-    let equipmentCount = try await BattleTech.Equipment.query(on: app.db(.replica)).count()
+    func testIndex() async throws {
+        _ = try await BattleTech.Equipment.create(on: app.db(.primary))
+        let equipmentCount = try await BattleTech.Equipment.query(on: app.db(.replica)).count()
 
-    try app.test(
-      .GET, path,
-      loggedInRequest: false,
-      afterResponse: { response in
-        let equipment = try response.content.decode(Page<BattleTech.Equipment>.self)
-        XCTAssertEqual(equipment.metadata.total, equipmentCount)
-      })
-  }
+        try app.test(
+            .GET, path,
+            loggedInRequest: false,
+            afterResponse: { response in
+                let equipment = try response.content.decode(Page<BattleTech.Equipment>.self)
+                XCTAssertEqual(equipment.metadata.total, equipmentCount)
+            })
+    }
 
-  func testShow() async throws {
-    let equipment = try await BattleTech.Equipment.create(on: app.db(.primary))
-    let showPath = "\(path)/\(equipment.id!)"
+    func testShow() async throws {
+        let equipment = try await BattleTech.Equipment.create(on: app.db(.primary))
+        let showPath = "\(path)/\(equipment.id!)"
 
-    try app.test(
-      .GET, showPath,
-      loggedInRequest: false,
-      afterResponse: { response in
-        let returnedEquipment = try response.content.decode(BattleTech.Equipment.self)
-        XCTAssertEqual(equipment.name, returnedEquipment.name)
-      })
-  }
+        try app.test(
+            .GET, showPath,
+            loggedInRequest: false,
+            afterResponse: { response in
+                let returnedEquipment = try response.content.decode(BattleTech.Equipment.self)
+                XCTAssertEqual(equipment.name, returnedEquipment.name)
+            })
+    }
 
-  func testShowNotFound() async throws {
-    let notFoundPath = "\(path)/NOT-A-UUID"
+    func testShowNotFound() async throws {
+        let notFoundPath = "\(path)/NOT-A-UUID"
 
-    try app.test(
-      .GET, notFoundPath,
-      loggedInRequest: false,
-      afterResponse: { response in
-        XCTAssertEqual(response.status, .notFound)
-      })
-  }
+        try app.test(
+            .GET, notFoundPath,
+            loggedInRequest: false,
+            afterResponse: { response in
+                XCTAssertEqual(response.status, .notFound)
+            })
+    }
 
-  func testDelete() async throws {
-    let equipment = try await BattleTech.Equipment.create(on: app.db(.primary))
-    let showPath = "\(path)/\(equipment.id!)"
+    func testDelete() async throws {
+        let equipment = try await BattleTech.Equipment.create(on: app.db(.primary))
+        let showPath = "\(path)/\(equipment.id!)"
 
-    try app.test(
-      .DELETE, showPath,
-      loggedInRequest: false,
-      afterResponse: { response in
-        XCTAssertEqual(response.status, .noContent)
-      })
-  }
+        try app.test(
+            .DELETE, showPath,
+            loggedInRequest: false,
+            afterResponse: { response in
+                XCTAssertEqual(response.status, .noContent)
+            })
+    }
 
-  func testImport() async throws {
-    let (testFileHandle, testFileRegion) = try await app.fileio.openFile(
-      path: "Tests/Resources/BattleTech/misc.csv",
-      eventLoop: app.eventLoopGroup.next()
-    ).get()
+    func testImport() async throws {
+        let (testFileHandle, testFileRegion) = try await app.fileio.openFile(
+            path: "Tests/Resources/BattleTech/misc.csv",
+            eventLoop: app.eventLoopGroup.next()
+        ).get()
 
-    let testFileByteBuffer = try await app.fileio.read(
-      fileRegion: testFileRegion, allocator: .init())
-    let equipmentMassImport = EquipmentMassImport(
-      file: File(data: testFileByteBuffer, filename: "misc.csv"))
-    try testFileHandle.close()
+        let testFileByteBuffer = try await app.fileio.read(
+            fileRegion: testFileRegion, allocator: .init())
+        let equipmentMassImport = EquipmentMassImport(
+            file: File(data: testFileByteBuffer, filename: "misc.csv"))
+        try testFileHandle.close()
 
-    let massImportPath = "\(path)/import"
+        let massImportPath = "\(path)/import"
 
-    try app.test(
-      .POST, massImportPath,
-      loggedInRequest: false,
-      beforeRequest: { request in
-        try request.content.encode(equipmentMassImport)
-      },
-      afterResponse: { response in
-        XCTAssertEqual(response.status, .created)
-        XCTAssertNotNil(app.queues.queue.pop())
-      })
+        try app.test(
+            .POST, massImportPath,
+            loggedInRequest: false,
+            beforeRequest: { request in
+                try request.content.encode(equipmentMassImport)
+            },
+            afterResponse: { response in
+                XCTAssertEqual(response.status, .created)
+                XCTAssertNotNil(app.queues.queue.pop())
+            })
 
-    _ = app.redis.send(command: "FLUSHDB")
-  }
+        _ = app.redis.send(command: "FLUSHDB")
+    }
 }

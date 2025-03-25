@@ -9,5 +9,5 @@
 import Vapor
 
 struct ConfirmUserDTO: Codable, Content {
-  var confirmToken: String
+    var confirmToken: String
 }
