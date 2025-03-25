@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
   name: "mul-api",
   platforms: [
-    .macOS(.v13)
+    .macOS(.v14)
   ],
   dependencies: [
     .package(url: "https://github.com/vapor/vapor.git", from: "4.114.0"),
@@ -14,7 +14,9 @@ let package = Package(
     .package(url: "https://github.com/CoreOffice/XMLCoder.git", from: "0.17.1"),
     .package(url: "https://github.com/swiftcsv/SwiftCSV.git", from: "0.10.0"),
     .package(url: "https://github.com/apple/swift-nio.git", from: "2.81.0"),
-    .package(url: "https://github.com/vapor-community/vapor-queues-fluent-driver.git", from: "3.0.0-beta.4"),
+    .package(
+      url: "https://github.com/vapor-community/vapor-queues-fluent-driver.git", from: "3.0.0-beta.4"
+    ),
   ],
   targets: [
     .executableTarget(
@@ -39,3 +41,9 @@ let package = Package(
       ]),
   ]
 )
+
+var swiftSettings: [SwiftSetting] {
+  [
+    .enableExperimentalFeature("StrictConcurrency")
+  ]
+}

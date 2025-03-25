@@ -18,15 +18,16 @@ WORKDIR /build
 # as long as your Package.swift/Package.resolved
 # files do not change.
 COPY ./Package.* ./
-RUN swift package resolve --skip-update \
+RUN swift package resolve \
   $([ -f ./Package.resolved ] && echo "--force-resolved-versions" || true)
 
 # Copy entire repo into container
 COPY . .
 
-# Build everything, with optimizations, with static linking, and using jemalloc
+# Build the application, with optimizations, with static linking, and using jemalloc
 # N.B.: The static version of jemalloc is incompatible with the static Swift runtime.
 RUN swift build -c release \
+  --product App \
   --static-swift-stdlib \
   -Xlinker -ljemalloc
 
@@ -50,7 +51,7 @@ RUN [ -d /build/Resources ] && { mv /build/Resources ./Resources && chmod -R a-w
 # ================================
 # Run image
 # ================================
-FROM --platform=linux/amd64 ubuntu:jammy
+FROM --platform=linux/amd64 ubuntu:noble
 
 # Make sure all system packages are up to date, and install only essential packages.
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \

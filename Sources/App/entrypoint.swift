@@ -1,3 +1,7 @@
+/*
+ * Main Entrypoint for the service.
+ */
+
 import Logging
 import NIOCore
 import NIOPosix
