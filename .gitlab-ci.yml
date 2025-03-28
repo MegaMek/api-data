@@ -12,11 +12,14 @@ stages:
   - incremental rollout 50%
   - incremental rollout 100%
   - performance
+  - release
   - cleanup
 
 include:
   - template: Auto-DevOps.gitlab-ci.yml
-  - remote: "https://gitlab.tapenvy.us/open-source/ci-templates/-/raw/main/ci/auto-tag-release.gitlab-ci.yml"
+  - project: open-source/ci-templates
+    ref: "main"
+    file: "/ci/auto-tag-release.gitlab-ci.yml"
 
 sast:
   stage: test
@@ -70,10 +73,6 @@ staging:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
   tags:
     - deploy
-
-tag_release:
-  rules:
-    - if: "$CI_COMMIT_BRANCH == 'main'"
 
 production:
   dependencies:

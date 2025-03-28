@@ -14,7 +14,6 @@ extension BattleTech {
                 rule.get("equipment", use: equipment).description("Equipment for Rule")
                 rule.get("weapons", use: weapons).description("Weapons for Rule")
             }
-
         }
 
         func index(req: Request) async throws -> [BattleTech.Rule] {
@@ -48,10 +47,10 @@ extension BattleTech {
 
         private func getRuleForRequest(req: Request) async throws -> BattleTech.Rule {
             guard let idString = req.parameters.get("rule_id"),
-                  let ruleUUID = UUID(idString),
-                  let rule = try await BattleTech.Rule.query(on: req.db)
-                .filter(\.$id == ruleUUID)
-                .first()
+                let ruleUUID = UUID(idString),
+                let rule = try await BattleTech.Rule.query(on: req.db)
+                    .filter(\.$id == ruleUUID)
+                    .first()
             else {
                 throw Abort(.notFound)
             }

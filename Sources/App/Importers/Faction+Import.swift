@@ -185,7 +185,8 @@ extension BattleTech.FactionName {
             foundFactionName.image = image
             try await foundFactionName.save(on: database)
         } else {
-            let factionName = BattleTech.FactionName(name: name, startYear: startYear, endYear: endYear, image: image)
+            let factionName = BattleTech.FactionName(
+                name: name, startYear: startYear, endYear: endYear, image: image)
             factionName.$faction.id = faction.id!
             try await factionName.save(on: database)
         }

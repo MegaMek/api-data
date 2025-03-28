@@ -34,7 +34,7 @@ extension BattleTech {
             let input = try req.content.decode(EraMassImport.self)
             let decoder = XMLDecoder()
 
-            let xmlString = String(decoding: Data(buffer: input.file.data), as: UTF8.self)
+            let xmlString = String(bytes: Data(buffer: input.file.data), encoding: .utf8) ?? ""
             let eras = try decoder.decode(Importers.Eras.self, from: xmlString.data(using: .utf8)!)
             let sortedEras = eras.era.sorted { ($0.end ?? 9999) < ($1.end ?? 9999) }
             var startYear = -1
@@ -53,10 +53,10 @@ extension BattleTech {
 
         private func eraForReq(req: Request) async throws -> BattleTech.Era {
             guard let eraIdString = req.parameters.get("era_id"),
-                  let eraUUID = UUID(eraIdString),
-                  let era = try await BattleTech.Era.query(on: req.db)
-                .filter(\.$id == eraUUID)
-                .first()
+                let eraUUID = UUID(eraIdString),
+                let era = try await BattleTech.Era.query(on: req.db)
+                    .filter(\.$id == eraUUID)
+                    .first()
             else {
                 throw Abort(.notFound)
             }

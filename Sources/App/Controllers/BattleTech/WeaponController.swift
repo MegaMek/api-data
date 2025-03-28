@@ -43,7 +43,8 @@ extension BattleTech {
                 let csvRow = Importers.WeaponCSVRow(row: row)
                 if csvRow.rulesReference().contains("Unofficial")
                     || csvRow.rulesRaw().contains("Unofficial")
-                    || csvRow.staticTechLevel().contains("Unofficial") {
+                    || csvRow.staticTechLevel().contains("Unofficial")
+                {
                     continue
                 }
 
@@ -55,14 +56,14 @@ extension BattleTech {
 
         private func weaponForRequest(req: Request) async throws -> BattleTech.Weapon {
             guard let weaponIdString = req.parameters.get("weapon_id"),
-                  let weaponUUID = UUID(weaponIdString),
-                  let weapon = try await BattleTech.Weapon.query(on: req.db)
-                .with(\.$techBase)
-                .with(\.$rules)
-                .with(\.$techLevelStatic)
-                .with(\.$aliases)
-                .filter(\.$id == weaponUUID)
-                .first()
+                let weaponUUID = UUID(weaponIdString),
+                let weapon = try await BattleTech.Weapon.query(on: req.db)
+                    .with(\.$techBase)
+                    .with(\.$rules)
+                    .with(\.$techLevelStatic)
+                    .with(\.$aliases)
+                    .filter(\.$id == weaponUUID)
+                    .first()
             else {
                 throw Abort(.notFound)
             }

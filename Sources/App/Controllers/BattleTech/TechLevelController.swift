@@ -48,10 +48,10 @@ extension BattleTech {
 
         private func getTechLevelForRequest(req: Request) async throws -> BattleTech.TechLevel {
             guard let idString = req.parameters.get("tech_level_id"),
-                  let techLevelUUID = UUID(idString),
-                  let techLevel = try await BattleTech.TechLevel.query(on: req.db)
-                .filter(\.$id == techLevelUUID)
-                .first()
+                let techLevelUUID = UUID(idString),
+                let techLevel = try await BattleTech.TechLevel.query(on: req.db)
+                    .filter(\.$id == techLevelUUID)
+                    .first()
             else {
                 throw Abort(.notFound)
             }

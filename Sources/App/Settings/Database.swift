@@ -33,7 +33,10 @@ struct ConfigureDatabase {
                     tls: .prefer(try .init(configuration: .makeClientConfiguration()))
                 ),
                 connectionPoolTimeout: .seconds(30)
-            ), as: .psql)
+            ),
+            as: .psql,
+            isDefault: true)
 
+        app.queues.use(.fluent())
     }
 }

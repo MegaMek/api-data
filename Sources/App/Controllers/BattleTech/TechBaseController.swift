@@ -14,7 +14,6 @@ extension BattleTech {
                 base.get("equipment", use: equipment).description("Equipment for Tech Base")
                 base.get("weapons", use: weapons).description("Weapons for Tech Base")
             }
-
         }
 
         func index(req: Request) async throws -> [BattleTech.TechBase] {
@@ -48,10 +47,10 @@ extension BattleTech {
 
         private func getTechBaseForRequest(req: Request) async throws -> BattleTech.TechBase {
             guard let idString = req.parameters.get("tech_base_id"),
-                  let techBaseUUID = UUID(idString),
-                  let techBase = try await BattleTech.TechBase.query(on: req.db)
-                .filter(\.$id == techBaseUUID)
-                .first()
+                let techBaseUUID = UUID(idString),
+                let techBase = try await BattleTech.TechBase.query(on: req.db)
+                    .filter(\.$id == techBaseUUID)
+                    .first()
             else {
                 throw Abort(.notFound)
             }

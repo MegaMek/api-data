@@ -35,12 +35,13 @@ extension BattleTech {
             return try await rule.$ammo.query(on: req.db).paginate(for: req)
         }
 
-        private func getMunitionTypeForRequest(req: Request) async throws -> BattleTech.MunitionType {
+        private func getMunitionTypeForRequest(req: Request) async throws -> BattleTech.MunitionType
+        {
             guard let idString = req.parameters.get("munition_type_id"),
-                  let munitionTypeUUID = UUID(idString),
-                  let munitionType = try await BattleTech.MunitionType.query(on: req.db)
-                .filter(\.$id == munitionTypeUUID)
-                .first()
+                let munitionTypeUUID = UUID(idString),
+                let munitionType = try await BattleTech.MunitionType.query(on: req.db)
+                    .filter(\.$id == munitionTypeUUID)
+                    .first()
             else {
                 throw Abort(.notFound)
             }

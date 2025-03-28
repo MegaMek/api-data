@@ -2,6 +2,7 @@ import Fluent
 import FluentPostgresDriver
 import Leaf
 import NIOSSL
+import QueuesFluentDriver
 import Vapor
 
 // configures your application

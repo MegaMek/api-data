@@ -11,11 +11,21 @@ import XCTVapor
 @testable import App
 
 final class EquipmentImportJobTests: XCTestCase {
-    func testEquipmentJob() async throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-        try await configureApp(app)
+    var app: Application!
 
+    override func setUp() async throws {
+        self.app = try await Application.make(.testing)
+        try await configure(app)
+        try await app.autoMigrate()
+    }
+
+    override func tearDown() async throws {
+        try await app.autoRevert()
+        try await self.app.asyncShutdown()
+        self.app = nil
+    }
+
+    func testEquipmentJob() async throws {
         let job = EquipmentImportJob()
         let context = QueueContext(
             queueName: .init(string: "test"), configuration: .init(), application: app,
@@ -27,10 +37,6 @@ final class EquipmentImportJobTests: XCTestCase {
     }
 
     func testEquipmentJobDuplicateRun() async throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-        try await configureApp(app)
-
         let job = EquipmentImportJob()
         let context = QueueContext(
             queueName: .init(string: "test"), configuration: .init(), application: app,
@@ -60,13 +66,7 @@ final class EquipmentImportJobTests: XCTestCase {
             "500000.0",
             "0.0",
             "298, TO",
-            "ISC3BoostedSystemSlaveUnit,IS C3 Boosted System Slave,C3 Boosted System (C3BS) [Slave],"
+            "ISC3BoostedSystemSlaveUnit,IS C3 Boosted System Slave,C3 Boosted System (C3BS) [Slave],",
         ]
-    }
-
-    private func configureApp(_ app: Application) async throws {
-        try await configure(app)
-        try await app.autoRevert()
-        try await app.autoMigrate()
     }
 }

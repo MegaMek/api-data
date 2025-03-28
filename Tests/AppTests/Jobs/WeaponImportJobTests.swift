@@ -11,11 +11,21 @@ import XCTVapor
 @testable import App
 
 final class WeaponImportJobTests: XCTestCase {
-    func testWeaponJob() async throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-        try await configureApp(app)
+    var app: Application!
 
+    override func setUp() async throws {
+        self.app = try await Application.make(.testing)
+        try await configure(app)
+        try await app.autoMigrate()
+    }
+
+    override func tearDown() async throws {
+        try await app.autoRevert()
+        try await self.app.asyncShutdown()
+        self.app = nil
+    }
+
+    func testWeaponJob() async throws {
         let job = WeaponImportJob()
         let context = QueueContext(
             queueName: .init(string: "test"), configuration: .init(), application: app,
@@ -27,10 +37,6 @@ final class WeaponImportJobTests: XCTestCase {
     }
 
     func testWeaponJobDuplicateRun() async throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-        try await configureApp(app)
-
         let job = WeaponImportJob()
         let context = QueueContext(
             queueName: .init(string: "test"), configuration: .init(), application: app,
@@ -74,14 +80,8 @@ final class WeaponImportJobTests: XCTestCase {
             "12",
             "12",
             "12",
-            "Bombast Laser,IS Bombast Laser,ISBombastLaser,"
+            "Bombast Laser,IS Bombast Laser,ISBombastLaser,",
 
         ]
-    }
-
-    private func configureApp(_ app: Application) async throws {
-        try await configure(app)
-        try await app.autoRevert()
-        try await app.autoMigrate()
     }
 }

@@ -38,8 +38,17 @@ struct APIMigrations {
         app.migrations.add(BattleTech.AddStartYearToEras())
         app.migrations.add(BattleTech.AddImageToFactionName())
 
-        // 2025-02-24
-        // Included from Fluent Queues Migrations
+        // Security
+        app.migrations.add(Security.CreateUser())
+        app.migrations.add(Security.CreateToken())
+        app.migrations.add(Security.CreateForgotPasswordToken())
+        app.migrations.add(Security.CreateConfirmationToken())
+        app.migrations.add(Security.AddConfirmedAtToUser())
+        app.migrations.add(Security.AddFirstAndLastNameToUser())
+        app.migrations.add(Security.AddUnconfirmedEmailToUser())
+
+        // Queues
         app.migrations.add(JobModelMigration())
+
     }
 }

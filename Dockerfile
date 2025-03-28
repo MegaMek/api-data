@@ -7,7 +7,8 @@ FROM --platform=linux/amd64 swift:6.0-noble AS build
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
   && apt-get -q update \
   && apt-get -q dist-upgrade -y \
-  && apt-get install -y libjemalloc-dev
+  && apt-get install -y libjemalloc-dev \
+  && apt-get clean
 
 # Set up a build area
 WORKDIR /build
@@ -57,10 +58,12 @@ RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
   && apt-get -q update \
   && apt-get -q dist-upgrade -y \
   && apt-get -q install -y \
-  libjemalloc2 \
   ca-certificates \
+  libcurl4 \
+  libjemalloc2 \
+  libxml2 \
   tzdata \
-  && rm -r /var/lib/apt/lists/*
+  && apt-get clean
 
 # Create a vapor user and group with /app as its home directory
 RUN useradd --user-group --create-home --system --skel /dev/null --home-dir /app vapor

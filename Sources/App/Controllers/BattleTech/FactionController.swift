@@ -63,13 +63,13 @@ extension BattleTech {
 
         private func factionForReq(req: Request) async throws -> BattleTech.Faction {
             guard let factionIdString = req.parameters.get("faction_id"),
-                  let factionUUID = UUID(factionIdString),
-                  let faction = try await BattleTech.Faction.query(on: req.db)
-                .with(\.$names)
-                .with(\.$parents)
-                .with(\.$subfactions)
-                .filter(\.$id == factionUUID)
-                .first()
+                let factionUUID = UUID(factionIdString),
+                let faction = try await BattleTech.Faction.query(on: req.db)
+                    .with(\.$names)
+                    .with(\.$parents)
+                    .with(\.$subfactions)
+                    .filter(\.$id == factionUUID)
+                    .first()
             else {
                 throw Abort(.notFound)
             }

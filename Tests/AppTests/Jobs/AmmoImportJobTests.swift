@@ -11,11 +11,21 @@ import XCTVapor
 @testable import App
 
 final class AmmoImportJobTests: XCTestCase {
-    func testAmmoJob() async throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-        try await configureApp(app)
+    var app: Application!
 
+    override func setUp() async throws {
+        self.app = try await Application.make(.testing)
+        try await configure(app)
+        try await app.autoMigrate()
+    }
+
+    override func tearDown() async throws {
+        try await app.autoRevert()
+        try await self.app.asyncShutdown()
+        self.app = nil
+    }
+
+    func testAmmoJob() async throws {
         let job = AmmoImportJob()
         let context = QueueContext(
             queueName: .init(string: "test"), configuration: .init(), application: app,
@@ -27,10 +37,6 @@ final class AmmoImportJobTests: XCTestCase {
     }
 
     func testAmmoJobDuplicateRun() async throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-        try await configureApp(app)
-
         let job = AmmoImportJob()
         let context = QueueContext(
             queueName: .init(string: "test"), configuration: .init(), application: app,
@@ -69,13 +75,7 @@ final class AmmoImportJobTests: XCTestCase {
             "FALSE",
             "125.0",
             "TRUE",
-            "IS Ammo HVAC/10,ISHVAC10 Ammo,IS Hyper Velocity Autocannon/10 Ammo,Hyper Velocity AC/10 Ammo,"
+            "IS Ammo HVAC/10,ISHVAC10 Ammo,IS Hyper Velocity Autocannon/10 Ammo,Hyper Velocity AC/10 Ammo,",
         ]
-    }
-
-    private func configureApp(_ app: Application) async throws {
-        try await configure(app)
-        try await app.autoRevert()
-        try await app.autoMigrate()
     }
 }
