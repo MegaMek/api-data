@@ -330,8 +330,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor-community/vapor-queues-fluent-driver.git",
       "state" : {
-        "revision" : "61b2fa9a65765bf55faddd887e07b57690d9ee6d",
-        "version" : "3.0.1"
+        "revision" : "8effcf143226e16746d2b16cf8c81f16ad931fd2",
+        "version" : "3.1.0"
       }
     },
     {
