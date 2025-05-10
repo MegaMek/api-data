@@ -50,5 +50,7 @@ struct APIMigrations {
         // Queues
         app.migrations.add(JobModelMigration())
 
+        // MegaMek
+        app.migrations.add(MegaMek.CreateServer())
     }
 }
