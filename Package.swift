@@ -1,4 +1,4 @@
-// swift-tools-version:6.0
+// swift-tools-version:6.1
 import PackageDescription
 
 let package = Package(
@@ -14,6 +14,7 @@ let package = Package(
     .package(url: "https://github.com/CoreOffice/XMLCoder.git", from: "0.17.1"),
     .package(url: "https://github.com/swiftcsv/SwiftCSV.git", from: "0.10.0"),
     .package(url: "https://github.com/apple/swift-nio.git", from: "2.81.0"),
+    .package(url: "https://github.com/vapor-community/sendgrid.git", from: "6.0.0"),
     .package(
       url: "https://github.com/vapor-community/vapor-queues-fluent-driver.git", from: "3.0.0-beta.4"
     ),
@@ -28,6 +29,7 @@ let package = Package(
         .product(name: "Vapor", package: "vapor"),
         .product(name: "XMLCoder", package: "XMLCoder"),
         .product(name: "SwiftCSV", package: "SwiftCSV"),
+        .product(name: "SendGrid", package: "sendgrid"),
         .product(name: "NIOCore", package: "swift-nio"),
         .product(name: "NIOPosix", package: "swift-nio"),
         .product(name: "QueuesFluentDriver", package: "vapor-queues-fluent-driver"),

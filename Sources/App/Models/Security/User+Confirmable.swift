@@ -7,10 +7,12 @@
 //
 
 import Fluent
+import SendGrid
 import Vapor
 
 extension Security.User {
     func sendConfirmEmail(_ req: Request, remoteURL: String) async throws {
+
         let token = try Security.ConfirmationToken.generate(for: self)
         try await token.save(on: req.db)
 
@@ -20,13 +22,13 @@ extension Security.User {
             user: self
         )
 
-        /*
-         _ = try await EmailHandler.sendEmail(
-         self,
-         subject: "Confirm Email",
-         body: "emails/confirmAccount",
-         context: context,
-         on: req) */
+
+        _ = try await EmailHandler.sendEmail(
+            self,
+            subject: "Confirm Email",
+            body: "emails/confirmAccount",
+            context: context,
+            on: req)
     }
 
     func sendConfirmEmailChange(_ req: Request, remoteURL: String) async throws {
@@ -38,13 +40,13 @@ extension Security.User {
             remoteURL: remoteURL,
             user: self
         )
-        /*
-         _ = try await EmailHandler.sendEmail(
-         self,
-         subject: "Confirm Email Change Request",
-         body: "emails/updateEmail",
-         context: context,
-         on: req) */
+
+        _ = try await EmailHandler.sendEmail(
+            self,
+            subject: "Confirm Email Change Request",
+            body: "emails/updateEmail",
+            context: context,
+            on: req)
     }
 
     func sendNewEmailChange(_ req: Request, remoteURL: String) async throws {
@@ -56,13 +58,13 @@ extension Security.User {
             remoteURL: remoteURL,
             user: self
         )
-        /*
-         _ = try await EmailHandler.sendEmailChange(
-         self,
-         subject: "Confirm New Email",
-         body: "emails/confirmAccount",
-         context: context,
-         on: req) */
+
+        _ = try await EmailHandler.sendEmailChange(
+            self,
+            subject: "Confirm New Email",
+            body: "emails/confirmAccount",
+            context: context,
+            on: req)
     }
 
     func confirm(on db: any Database) async throws {
