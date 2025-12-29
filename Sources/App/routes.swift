@@ -4,4 +4,5 @@ import Vapor
 func routes(_ app: Application) throws {
     try app.register(collection: Api.RootController())
     try app.register(collection: BattleTech.RootController())
+    try app.register(collection: ServersController())
 }

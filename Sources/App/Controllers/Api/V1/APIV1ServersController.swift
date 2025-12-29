@@ -18,8 +18,8 @@ extension Api.V1 {
             servers.delete(":server_id", use: destroy).description("Delete an existing server.")
         }
 
-        func index(req: Request) async throws -> Response {
-            return .init(status: .accepted)
+        func index(req: Request) async throws -> [MegaMek.Server] {
+            return try await MegaMek.Server.query(on: req.db).all()
         }
 
         func create(req: Request) async throws -> Response {
