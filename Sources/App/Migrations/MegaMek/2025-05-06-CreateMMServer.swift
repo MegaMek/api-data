@@ -1,3 +1,9 @@
+///  2025-05-06-CreateMMServer.swift
+///  mul-api
+///
+///  Fluent migration (dated 2025-05-06) that creates the `megamek.servers` table, used
+///  to register MegaMek game servers (address, port, version, password state, MOTD, etc.)
+///  for discovery.
 //
 //  2025-05-06-CreateMMServer.swift
 //  mul-api
@@ -9,7 +15,11 @@ import Fluent
 import FluentSQL
 
 extension MegaMek {
+    /// Creates the `megamek.servers` table.
     struct CreateServer: AsyncMigration {
+        /// Creates the `servers` table with its initial columns.
+        /// - Parameter database: The database connection to apply the migration on.
+        /// - Throws: An error if the schema change fails to apply.
         func prepare(on database: any Database) async throws {
             try await database.schema(for: MegaMek.Server.self)
                 .id()
@@ -28,6 +38,9 @@ extension MegaMek {
                 .create()
         }
 
+        /// Drops the `servers` table.
+        /// - Parameter database: The database connection to revert the migration on.
+        /// - Throws: An error if the schema change fails to revert.
         func revert(on database: any Database) async throws {
             try await database.schema(for: MegaMek.Server.self).delete()
         }
@@ -35,6 +48,9 @@ extension MegaMek {
 }
 
 extension MegaMek.Server {
+    /// Stable, versioned column-name namespace for ``MegaMek/Server`` as of this migration
+    /// (2025-05-06, tagged `V20250509`). Keeps the database column names fixed even if the
+    /// Swift properties on the model are later renamed.
     enum V20250509 {
         static let schemaName = "servers"
         static let spaceName = "megamek"

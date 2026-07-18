@@ -1,17 +1,20 @@
-//
-//  CreateFactions.swift
-//
-// Creates the Factions model based upon the XML from MegaMek
-//
-// Author: Richard J Hancock
-// Date: 2024/03/16
-//
+/// CreateFactions.swift
+///
+/// Fluent migration that creates the `factions` table, storing BattleTech's playable factions
+/// (e.g. House Davion, Clan Wolf), based on data sourced from MegaMek's XML.
+///
+/// Author: Richard J Hancock
+/// Date: 2024/03/16
 
 import Fluent
 import FluentSQL
 
 extension BattleTech {
+    /// Creates the `factions` table.
     struct CreateFactions: AsyncMigration {
+        /// Creates the `factions` table.
+        /// - Parameter database: The database connection to apply the schema change to.
+        /// - Throws: An error if the schema change fails.
         func prepare(on database: any Database) async throws {
             try await database.schema(for: BattleTech.Faction.self)
                 .id()
@@ -29,6 +32,9 @@ extension BattleTech {
                 .create()
         }
 
+        /// Drops the `factions` table.
+        /// - Parameter database: The database connection to apply the schema change to.
+        /// - Throws: An error if the schema change fails.
         func revert(on database: any Database) async throws {
             try await database.schema(for: BattleTech.Faction.self).delete()
         }
@@ -36,6 +42,7 @@ extension BattleTech {
 }
 
 extension BattleTech.Faction {
+    /// Column-name constants (``FieldKey``s) for the `factions` table, version 2024-03-16.
     enum V20240316 {
         static let schemaName = "factions"
         static let spaceName = "battletech"

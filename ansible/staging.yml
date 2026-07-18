@@ -10,7 +10,7 @@
     proxy_server_url: "localhost:9080"
     cert_name: "battletech.dev"
     docker_image: "develop"
-    docker_url: registry.tapenvy.us:443/open-source/megamek/mul-api/{{ docker_image }}:latest
+    docker_url: "ghcr.io/megamek/api-data:{{ docker_image }}"
     username: "{{ lookup('file', './templates/username') }}"
     password: "{{ lookup('file', './templates/password') }}"
     database_host: "{{ lookup('file', './templates/database_host') }}"
@@ -18,7 +18,6 @@
     database_password: "{{ lookup('file', './templates/database_password') }}"
     database_username: "{{ lookup('file', './templates/database_username') }}"
     sendgrid_api_key: "{{ lookup('file', './templates/sendgrid') }}"
-    redis_url: "{{ lookup('file', './templates/redis_url') }}"
 
   tasks:
     - name: Install Docker
@@ -44,7 +43,7 @@
 
     - name: Log into private registry and force re-authorization
       community.docker.docker_login:
-        registry_url: registry.tapenvy.us:443
+        registry_url: ghcr.io
         username: "{{ username }}"
         password: "{{ password }}"
         reauthorize: true
@@ -62,7 +61,6 @@
           DATABASE_PASSWORD: "{{ database_password }}"
           DATABASE_NAME: "{{ database_name }}"
           SENDGRID_API_KEY: "{{ sendgrid_api_key }}"
-          REDIS_URL: "{{ redis_url }}"
 
     - name: Start Container
       community.docker.docker_container:
@@ -81,11 +79,10 @@
           DATABASE_PASSWORD: "{{ database_password }}"
           DATABASE_NAME: "{{ database_name }}"
           SENDGRID_API_KEY: "{{ sendgrid_api_key }}"
-          REDIS_URL: "{{ redis_url }}"
 
     - name: Log out of Registry
       community.docker.docker_login:
-        registry_url: registry.tapenvy.us:443
+        registry_url: ghcr.io
         state: absent
 
     - name: Copy Nginx conf

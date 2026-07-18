@@ -1,17 +1,21 @@
-//
-//  CreateWeaponAlias.swift
-//
-// Creates the Weapon Alias model. Data Imported/Updated via data Import
-//
-// Author: Richard J Hancock
-// Date: 2024/03/23
-//
+/// CreateAmmoAlias.swift
+///
+/// Fluent migration that creates the `ammo_alias` table, storing alternate/historical names for
+/// an ammo record. Row data itself is populated/updated via a separate data-import process.
+///
+/// Author: Richard J Hancock
+/// Date: 2024/03/23
 
 import Fluent
 import FluentSQL
 
 extension BattleTech {
+    /// Creates the `ammo_alias` table, which references `ammo` via a required `ammo_id`
+    /// foreign key.
     struct CreateAmmoAlias: AsyncMigration {
+        /// Creates the `ammo_alias` table.
+        /// - Parameter database: The database connection to apply the schema change to.
+        /// - Throws: An error if the schema change fails.
         func prepare(on database: any Database) async throws {
             try await database.schema(for: BattleTech.AmmoAlias.self)
                 .id()
@@ -34,6 +38,9 @@ extension BattleTech {
                 .create()
         }
 
+        /// Drops the `ammo_alias` table.
+        /// - Parameter database: The database connection to apply the schema change to.
+        /// - Throws: An error if the schema change fails.
         func revert(on database: any Database) async throws {
             try await database.schema(for: BattleTech.AmmoAlias.self).delete()
         }
@@ -41,6 +48,7 @@ extension BattleTech {
 }
 
 extension BattleTech.AmmoAlias {
+    /// Column-name constants (``FieldKey``s) for the `ammo_alias` table, version 2024-03-27.
     enum V20240327 {
         static let schemaName = "ammo_alias"
         static let spaceName = "battletech"

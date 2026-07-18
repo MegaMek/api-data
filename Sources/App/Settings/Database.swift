@@ -12,7 +12,16 @@ import Fluent
 import FluentPostgresDriver
 import Vapor
 
+/// Namespace holding the primary/replica database configuration for the app.
+/// Invoked once from ``configure(_:)`` during startup, before migrations run.
 struct ConfigureDatabase {
+    /// Registers the Postgres database connection (reading host/port/credentials
+    /// from environment variables, with local-dev defaults) and enables the
+    /// Fluent-backed Queues driver, which stores background job state in the
+    /// same database.
+    ///
+    /// - Parameter app: The `Application` to register the database on.
+    /// - Throws: Rethrows errors from building the TLS client configuration.
     static func configure(_ app: Application) async throws {
         let defaultPort = SQLPostgresConfiguration.ianaPortNumber
 

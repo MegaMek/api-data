@@ -1,17 +1,21 @@
-//
-//  CreateRuleWeaponPivot.swift
-//
-// Create the pivot for Rules with Weapons
-//
-// Author: Richard J Hancock
-// Date: 2024/03/16
-//
+/// CreateRuleWeaponPivot.swift
+///
+/// Fluent migration that creates the `rule_weapon_pivot` table, the join table between weapons
+/// and the rules that govern them.
+///
+/// Author: Richard J Hancock
+/// Date: 2024/03/16
 
 import Fluent
 import FluentSQL
 
 extension BattleTech {
+    /// Creates the `rule_weapon_pivot` table — the many-to-many join table between
+    /// ``BattleTech/Rule`` and ``BattleTech/Weapon``.
     struct CreateRuleWeaponPivot: AsyncMigration {
+        /// Creates the `rule_weapon_pivot` table.
+        /// - Parameter database: The database connection to apply the schema change to.
+        /// - Throws: An error if the schema change fails.
         func prepare(on database: any Database) async throws {
             try await database.schema(for: BattleTech.RuleWeaponPivot.self)
                 .id()
@@ -33,6 +37,9 @@ extension BattleTech {
                 .create()
         }
 
+        /// Drops the `rule_weapon_pivot` table.
+        /// - Parameter database: The database connection to apply the schema change to.
+        /// - Throws: An error if the schema change fails.
         func revert(on database: any Database) async throws {
             try await database.schema(for: BattleTech.RuleWeaponPivot.self).delete()
         }
@@ -40,6 +47,8 @@ extension BattleTech {
 }
 
 extension BattleTech.RuleWeaponPivot {
+    /// Column-name constants (``FieldKey``s) for the `rule_weapon_pivot` table, version
+    /// 2024-03-16.
     enum V20240316 {
         static let schemaName = "rule_weapon_pivot"
         static let spaceName = "battletech"

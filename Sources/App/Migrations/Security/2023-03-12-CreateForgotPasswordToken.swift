@@ -1,5 +1,7 @@
-//
-//  CreateForgotPasswordToken.swift
+///  CreateForgotPasswordToken.swift
+///
+///  Fluent migration (dated 2023-03-12) that creates the `security.forgot_password_tokens`
+///  table, storing password-reset tokens tied to a ``Security/User`` via a foreign key.
 //
 //  Tokens for Forgot Password.
 //
@@ -10,7 +12,11 @@ import Fluent
 import FluentSQL
 
 extension Security {
+    /// Creates the `security.forgot_password_tokens` table.
     struct CreateForgotPasswordToken: AsyncMigration {
+        /// Creates the `forgot_password_tokens` table with its initial columns.
+        /// - Parameter database: The database connection to apply the migration on.
+        /// - Throws: An error if the schema change fails to apply.
         func prepare(on database: any Database) async throws {
             try await database.schema(for: Security.ForgotPasswordToken.self)
                 .id()
@@ -28,6 +34,9 @@ extension Security {
                 .create()
         }
 
+        /// Drops the `forgot_password_tokens` table.
+        /// - Parameter database: The database connection to revert the migration on.
+        /// - Throws: An error if the schema change fails to revert.
         func revert(on database: any Database) async throws {
             try await database.schema(for: Security.ForgotPasswordToken.self).delete()
         }
@@ -35,6 +44,9 @@ extension Security {
 }
 
 extension Security.ForgotPasswordToken {
+    /// Stable, versioned column-name namespace for ``Security/ForgotPasswordToken`` as of
+    /// this migration (2023-03-12). Keeps the database column names fixed even if the
+    /// Swift properties on the model are later renamed.
     enum V20230312 {
         static let schemaName = "forgot_password_tokens"
         static let spaceName = "security"

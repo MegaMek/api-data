@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: swift:6.3-noble
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: vapor_username
+          POSTGRES_PASSWORD: vapor_password
+          POSTGRES_DB: vapor_test
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_HOST: postgres
+      DATABASE_USERNAME: vapor_username
+      DATABASE_PASSWORD: vapor_password
+      DATABASE_NAME: vapor_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run tests with coverage
+        run: swift test --enable-code-coverage
+      - name: Generate coverage report
+        if: always()
+        run: |
+          BIN_PATH="$(swift build --show-bin-path)"
+          XCTEST_PATH="$(find "$BIN_PATH" -name '*.xctest')"
+          IGNORE_FILENAME_REGEX="(\.build|TestUtils|Tests)"
+
+          llvm-cov export "$XCTEST_PATH" \
+            --format=lcov \
+            --instr-profile=".build/debug/codecov/default.profdata" \
+            --ignore-filename-regex="$IGNORE_FILENAME_REGEX" > coverage.lcov
+
+          {
+            echo "### Code coverage"
+            echo
+            echo '```'
+            llvm-cov report "$XCTEST_PATH" \
+              --instr-profile=".build/debug/codecov/default.profdata" \
+              --ignore-filename-regex="$IGNORE_FILENAME_REGEX"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.lcov
+
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: reviewdog/action-setup@v1
+      - name: Run SwiftLint
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work ghcr.io/realm/swiftlint:latest \
+            swiftlint lint --reporter checkstyle > swiftlint-report.xml
+      - name: Annotate with reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          reviewdog -f=checkstyle -name=swiftlint -reporter=github-check \
+            -filter-mode=nofilter -fail-level=error < swiftlint-report.xml

@@ -1,17 +1,21 @@
-//
-//  CreateWeapons.swift
-//
-// Creates the Weapons model for CSV Import
-//
-// Author: Richard J Hancock
-// Date: 2024/03/16
-//
+/// CreateWeapons.swift
+///
+/// Fluent migration that creates the `weapons` table, storing BattleTech weapon data (ranges,
+/// damage, tonnage, tech base/level, etc.) for CSV import.
+///
+/// Author: Richard J Hancock
+/// Date: 2024/03/16
 
 import Fluent
 import FluentSQL
 
 extension BattleTech {
+    /// Creates the `weapons` table.
     struct CreateWeapons: AsyncMigration {
+        /// Creates the `weapons` table with its columns, foreign keys to `tech_base`/
+        /// `tech_level`, and uniqueness constraint.
+        /// - Parameter database: The database connection to apply the schema change to.
+        /// - Throws: An error if the schema change fails.
         func prepare(on database: any Database) async throws {
             try await database.schema(for: BattleTech.Weapon.self)
                 .id()
@@ -66,6 +70,9 @@ extension BattleTech {
                 .create()
         }
 
+        /// Drops the `weapons` table.
+        /// - Parameter database: The database connection to apply the schema change to.
+        /// - Throws: An error if the schema change fails.
         func revert(on database: any Database) async throws {
             try await database.schema(for: BattleTech.Weapon.self).delete()
         }
@@ -73,6 +80,7 @@ extension BattleTech {
 }
 
 extension BattleTech.Weapon {
+    /// Column-name constants (``FieldKey``s) for the `weapons` table, version 2024-03-16.
     enum V20240316 {
         static let schemaName = "weapons"
         static let spaceName = "battletech"

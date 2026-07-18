@@ -1,17 +1,20 @@
-//
-//  CreateRule.swift
-//
-// Creates the Rule model. Data Imported/Updated via data Import
-//
-// Author: Richard J Hancock
-// Date: 2024/03/16
-//
+/// CreateRule.swift
+///
+/// Fluent migration that creates the `rules` table, storing named BattleTech rulebook
+/// references. Row data itself is populated/updated via a separate data-import process.
+///
+/// Author: Richard J Hancock
+/// Date: 2024/03/16
 
 import Fluent
 import FluentSQL
 
 extension BattleTech {
+    /// Creates the `rules` table.
     struct CreateRules: AsyncMigration {
+        /// Creates the `rules` table.
+        /// - Parameter database: The database connection to apply the schema change to.
+        /// - Throws: An error if the schema change fails.
         func prepare(on database: any Database) async throws {
             try await database.schema(for: BattleTech.Rule.self)
                 .id()
@@ -20,6 +23,9 @@ extension BattleTech {
                 .create()
         }
 
+        /// Drops the `rules` table.
+        /// - Parameter database: The database connection to apply the schema change to.
+        /// - Throws: An error if the schema change fails.
         func revert(on database: any Database) async throws {
             try await database.schema(for: BattleTech.Rule.self).delete()
         }
@@ -27,6 +33,7 @@ extension BattleTech {
 }
 
 extension BattleTech.Rule {
+    /// Column-name constants (``FieldKey``s) for the `rules` table, version 2024-03-16.
     enum V20240316 {
         static let schemaName = "rules"
         static let spaceName = "battletech"

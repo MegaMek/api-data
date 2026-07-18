@@ -1,17 +1,24 @@
-//
-//  CreateFactionSubfactionPivot.swift
-//
-// Creates the Factions model based upon the XML from MegaMek
-//
-// Author: Richard J Hancock
-// Date: 2024/03/16
-//
+/// CreateFactionSubfactionPivot.swift
+///
+/// Fluent migration that creates the `faction_subfaction_pivot` table, the many-to-many join
+/// table linking a faction to the other factions that are its sub-factions.
+///
+/// Author: Richard J Hancock
+/// Date: 2024/03/16
 
 import Fluent
 import FluentSQL
 
 extension BattleTech {
+    /// Creates the `faction_subfaction_pivot` table.
+    ///
+    /// A "pivot" migration creates a join table for a many-to-many relationship instead of a
+    /// table for a standalone model — here, between factions and their sub-factions. Both
+    /// foreign keys reference `factions.id` since a sub-faction is itself a ``BattleTech/Faction``.
     struct CreateFactionSubfactionPivot: AsyncMigration {
+        /// Creates the `faction_subfaction_pivot` table.
+        /// - Parameter database: The database connection to apply the schema change to.
+        /// - Throws: An error if the schema change fails.
         func prepare(on database: any Database) async throws {
             try await database.schema(for: BattleTech.FactionSubfactionPivot.self)
                 .id()
@@ -33,6 +40,9 @@ extension BattleTech {
                 .create()
         }
 
+        /// Drops the `faction_subfaction_pivot` table.
+        /// - Parameter database: The database connection to apply the schema change to.
+        /// - Throws: An error if the schema change fails.
         func revert(on database: any Database) async throws {
             try await database.schema(for: BattleTech.FactionSubfactionPivot.self).delete()
         }
@@ -40,6 +50,8 @@ extension BattleTech {
 }
 
 extension BattleTech.FactionSubfactionPivot {
+    /// Column-name constants (``FieldKey``s) for the `faction_subfaction_pivot` table, version
+    /// 2024-03-16.
     enum V20240316 {
         static let schemaName = "faction_subfaction_pivot"
         static let spaceName = "battletech"

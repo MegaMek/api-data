@@ -1,17 +1,22 @@
-//
-//  CreateAmmo.swift
-//
-// Creates the Ammo model for CSV Import
-//
-// Author: Richard J Hancock
-// Date: 2024/03/27
-//
+/// CreateAmmo.swift
+///
+/// Fluent migration that creates the `ammo` table, storing BattleTech ammunition data (mirrors
+/// the `weapons` table's shape, plus ammo-specific fields like shots and munition type) for CSV
+/// import.
+///
+/// Author: Richard J Hancock
+/// Date: 2024/03/27
 
 import Fluent
 import FluentSQL
 
 extension BattleTech {
+    /// Creates the `ammo` table.
     struct CreateAmmo: AsyncMigration {
+        /// Creates the `ammo` table with its columns, foreign keys to `tech_base`/`tech_level`/
+        /// `munition_type`, and uniqueness constraint.
+        /// - Parameter database: The database connection to apply the schema change to.
+        /// - Throws: An error if the schema change fails.
         func prepare(on database: any Database) async throws {
             try await database.schema(for: BattleTech.Ammo.self)
                 .id()
@@ -65,6 +70,9 @@ extension BattleTech {
                 .create()
         }
 
+        /// Drops the `ammo` table.
+        /// - Parameter database: The database connection to apply the schema change to.
+        /// - Throws: An error if the schema change fails.
         func revert(on database: any Database) async throws {
             try await database.schema(for: BattleTech.Ammo.self).delete()
         }
@@ -72,6 +80,7 @@ extension BattleTech {
 }
 
 extension BattleTech.Ammo {
+    /// Column-name constants (``FieldKey``s) for the `ammo` table, version 2024-03-27.
     enum V20240327 {
         static let schemaName = "ammo"
         static let spaceName = "battletech"
@@ -101,7 +110,7 @@ extension BattleTech.Ammo {
         static let ammoRatio = FieldKey(stringLiteral: "ammo_ratio")
         static let isCapital = FieldKey(stringLiteral: "is_capital")
         static let kilogramPerShot = FieldKey(stringLiteral: "kilogram_per_shot")
-        static let aeroUse = FieldKey(stringLiteral: "FieldKey")
+        static let aeroUse = FieldKey(stringLiteral: "aero_use")
 
         static let publishedAt = FieldKey(stringLiteral: "published_at")
         static let createdAt = FieldKey(stringLiteral: "created_at")

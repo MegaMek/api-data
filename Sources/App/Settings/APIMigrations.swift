@@ -1,5 +1,15 @@
-//
-//  Migrations.swift
+///  Migrations.swift
+///
+///  The definitive, ordered list of every Fluent migration applied to this app's database
+///  at startup — the "table of contents" for how the schema has evolved over time and in
+///  what order. Each `app.migrations.add(...)` call below registers one migration type
+///  (see the individual files, e.g. under `Migrations/Security/` and `Migrations/MegaMek/`,
+///  each named with a date prefix such as `2022-12-27-CreateUser.swift`). Vapor/Fluent runs
+///  registered migrations in this list's order and records which have already run, so:
+///  - New migrations must be appended, never inserted earlier in the list.
+///  - The order here should track the chronological order of the migrations' date
+///    prefixes, since a later migration may depend on a table/column an earlier one
+///    created.
 //
 //  All Migrations for the app.
 //
@@ -10,7 +20,11 @@ import Fluent
 import QueuesFluentDriver
 import Vapor
 
+/// Namespace holding the app's migration-registration logic.
 struct APIMigrations {
+    /// Registers every migration this app knows about with Vapor, in the order they must
+    /// run to reproduce the current schema from scratch.
+    /// - Parameter app: The Vapor `Application` whose `app.migrations` registry is populated.
     static func applyMigrations(_ app: Application) {
 
         // Migrations
@@ -52,5 +66,8 @@ struct APIMigrations {
 
         // MegaMek
         app.migrations.add(MegaMek.CreateServer())
+
+        // Fixes
+        app.migrations.add(BattleTech.FixAmmoAeroUseColumnName())
     }
 }

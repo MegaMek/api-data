@@ -16,6 +16,7 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-nio.git", from: "2.101.3"),
     .package(url: "https://github.com/vapor-community/sendgrid.git", from: "6.0.0"),
     .package(url: "https://github.com/vapor-community/vapor-queues-fluent-driver.git", from: "3.2.0"),
+    .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
   ],
   targets: [
     .executableTarget(
