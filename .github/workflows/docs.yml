@@ -1,0 +1,45 @@
+name: Publish DocC to GitHub Pages
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: swift:6.3-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate DocC documentation
+        run: |
+          swift package --allow-writing-to-directory ./docs \
+            generate-documentation \
+            --target App \
+            --disable-indexing \
+            --transform-for-static-hosting \
+            --hosting-base-path ${{ github.event.repository.name }} \
+            --output-path ./docs
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

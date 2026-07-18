@@ -5,142 +5,135 @@
 //
 
 import Fluent
-import XCTVapor
+import Testing
+import VaporTesting
 
 @testable import App
 
-final class ErasControllerTests: XCTestCase {
-    var app: Application!
+@Suite(.serialized, .databaseSerialized)
+struct ErasControllerTests {
+    let path = "/battletech/eras"
 
-    var path = "/battletech/eras"
+    @Test
+    func index() async throws {
+        try await withTestApp { app in
+            _ = try await BattleTech.Era.create(on: app.db)
+            let eraCount = try await BattleTech.Era.query(on: app.db).count()
 
-    override func setUp() async throws {
-        self.app = try await Application.make(.testing)
-        try await configure(app)
-        try await app.autoMigrate()
+            try await app.test(
+                .GET, path,
+                loggedInRequest: false,
+                afterResponse: { response in
+                    let eras = try response.content.decode([BattleTech.Era].self)
+                    #expect(eras.count == eraCount)
+                })
+        }
     }
 
-    override func tearDown() async throws {
-        try await app.autoRevert()
-        try await self.app.asyncShutdown()
-        self.app = nil
+    @Test
+    func show() async throws {
+        try await withTestApp { app in
+            let era = try await BattleTech.Era.create(on: app.db)
+            let showPath = "\(path)/\(era.id!)"
+
+            try await app.test(
+                .GET, showPath,
+                loggedInRequest: false,
+                afterResponse: { response in
+                    let returnedEra = try response.content.decode(BattleTech.Era.self)
+                    #expect(era.name == returnedEra.name)
+                })
+        }
     }
 
-    func testIndex() async throws {
-        _ = try await BattleTech.Era.create(on: app.db)
-        let eraCount = try await BattleTech.Era.query(on: app.db).count()
+    @Test
+    func showNotFound() async throws {
+        try await withTestApp { app in
+            let notFoundPath = "\(path)/NOT-A-UUID"
 
-        try app.test(
-            .GET, path,
-            loggedInRequest: false,
-            afterResponse: { response in
-                let eras = try response.content.decode([BattleTech.Era].self)
-                XCTAssertEqual(eras.count, eraCount)
-            })
+            try await app.test(
+                .GET, notFoundPath,
+                loggedInRequest: false,
+                afterResponse: { response in
+                    #expect(response.status == .notFound)
+                })
+        }
     }
 
-    func testShow() async throws {
-        let era = try await BattleTech.Era.create(on: app.db)
-        let showPath = "\(path)/\(era.id!)"
+    @Test
+    func delete() async throws {
+        try await withTestApp { app in
+            let era = try await BattleTech.Era.create(on: app.db)
+            let showPath = "\(path)/\(era.id!)"
 
-        try app.test(
-            .GET, showPath,
-            loggedInRequest: false,
-            afterResponse: { response in
-                let returnedEra = try response.content.decode(BattleTech.Era.self)
-                XCTAssertEqual(era.name, returnedEra.name)
-            })
+            try await app.test(
+                .DELETE, showPath,
+                loggedInRequest: false,
+                afterResponse: { response in
+                    #expect(response.status == .noContent)
+                })
+        }
     }
 
-    func testShowNotFound() async throws {
-        let notFoundPath = "\(path)/NOT-A-UUID"
+    @Test
+    func `import`() async throws {
+        try await withTestApp { app in
+            let eraCount = try await BattleTech.Era.query(on: app.db).count()
 
-        try app.test(
-            .GET, notFoundPath,
-            loggedInRequest: false,
-            afterResponse: { response in
-                XCTAssertEqual(response.status, .notFound)
-            })
+            let testFileByteBuffer = try await TestResources.buffer(for: "BattleTech/eras.xml")
+            let eraMassImport = EraMassImport(
+                file: File(data: testFileByteBuffer, filename: "eras.xml"))
+
+            let massImportPath = "\(path)/import"
+
+            try await app.test(
+                .POST, massImportPath,
+                loggedInRequest: false,
+                beforeRequest: { request in
+                    try request.content.encode(eraMassImport)
+                },
+                afterResponse: { response in
+                    #expect(response.status == .created)
+                })
+
+            let postEraCount = try await BattleTech.Era.query(on: app.db).count()
+            #expect(eraCount != postEraCount)
+        }
     }
 
-    func testDelete() async throws {
-        let era = try await BattleTech.Era.create(on: app.db)
-        let showPath = "\(path)/\(era.id!)"
+    @Test
+    func duplicateImport() async throws {
+        try await withTestApp { app in
+            let testFileByteBuffer = try await TestResources.buffer(for: "BattleTech/eras.xml")
+            let eraMassImport = EraMassImport(
+                file: File(data: testFileByteBuffer, filename: "eras.xml"))
 
-        try app.test(
-            .DELETE, showPath,
-            loggedInRequest: false,
-            afterResponse: { response in
-                XCTAssertEqual(response.status, .noContent)
-            })
-    }
+            let massImportPath = "\(path)/import"
 
-    func testImport() async throws {
-        let eraCount = try await BattleTech.Era.query(on: app.db).count()
+            try await app.test(
+                .POST, massImportPath,
+                loggedInRequest: false,
+                beforeRequest: { request in
+                    try request.content.encode(eraMassImport)
+                },
+                afterResponse: { response in
+                    #expect(response.status == .created)
+                })
 
-        let (testFileHandle, testFileRegion) = try await app.fileio.openFile(
-            path: "Tests/Resources/BattleTech/eras.xml",
-            eventLoop: app.eventLoopGroup.next()
-        ).get()
+            let eraCount = try await BattleTech.Era.query(on: app.db).count()
 
-        let testFileByteBuffer = try await app.fileio.read(
-            fileRegion: testFileRegion, allocator: .init())
-        let eraMassImport = EraMassImport(
-            file: File(data: testFileByteBuffer, filename: "eras.xml"))
-        try testFileHandle.close()
+            try await app.test(
+                .POST, massImportPath,
+                loggedInRequest: false,
+                beforeRequest: { request in
+                    try request.content.encode(eraMassImport)
+                },
+                afterResponse: { response in
+                    let postCount = try await BattleTech.Era.query(on: app.db).count()
 
-        let massImportPath = "\(path)/import"
-
-        try app.test(
-            .POST, massImportPath,
-            loggedInRequest: false,
-            beforeRequest: { request in
-                try request.content.encode(eraMassImport)
-            },
-            afterResponse: { response in
-                XCTAssertEqual(response.status, .created)
-            })
-
-        let postEraCount = try await BattleTech.Era.query(on: app.db).count()
-        XCTAssertNotEqual(eraCount, postEraCount)
-    }
-
-    func testDuplicateImport() async throws {
-        let (testFileHandle, testFileRegion) = try await app.fileio.openFile(
-            path: "Tests/Resources/BattleTech/eras.xml",
-            eventLoop: app.eventLoopGroup.next()
-        ).get()
-
-        let testFileByteBuffer = try await app.fileio.read(
-            fileRegion: testFileRegion, allocator: .init())
-        let eraMassImport = EraMassImport(
-            file: File(data: testFileByteBuffer, filename: "eras.xml"))
-        try testFileHandle.close()
-
-        let massImportPath = "\(path)/import"
-
-        try app.test(
-            .POST, massImportPath,
-            loggedInRequest: false,
-            beforeRequest: { request in
-                try request.content.encode(eraMassImport)
-            },
-            afterResponse: { response in
-                XCTAssertEqual(response.status, .created)
-            })
-
-        let eraCount = try await BattleTech.Era.query(on: app.db).count()
-
-        try await app.test(
-            .POST, massImportPath,
-            beforeRequest: { request in
-                try request.content.encode(eraMassImport)
-            },
-            afterResponse: { response in
-                let postCount = try await BattleTech.Era.query(on: app.db).count()
-
-                XCTAssertEqual(response.status, .created)
-                XCTAssertEqual(eraCount, postCount)
-            })
+                    #expect(response.status == .created)
+                    #expect(eraCount == postCount)
+                })
+        }
     }
 }

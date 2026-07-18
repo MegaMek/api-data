@@ -1,5 +1,8 @@
-//
-//  CreateConfirmationToken.swift
+///  CreateConfirmationToken.swift
+///
+///  Fluent migration (dated 2023-03-16) that creates the `security.confirmation_tokens`
+///  table, storing email/account-confirmation tokens tied to a ``Security/User`` via a
+///  foreign key.
 //
 //  Tokens for Confirmation.
 //
@@ -10,7 +13,11 @@ import Fluent
 import FluentSQL
 
 extension Security {
+    /// Creates the `security.confirmation_tokens` table.
     struct CreateConfirmationToken: AsyncMigration {
+        /// Creates the `confirmation_tokens` table with its initial columns.
+        /// - Parameter database: The database connection to apply the migration on.
+        /// - Throws: An error if the schema change fails to apply.
         func prepare(on database: any Database) async throws {
             try await database.schema(for: Security.ConfirmationToken.self)
                 .id()
@@ -28,6 +35,9 @@ extension Security {
                 .create()
         }
 
+        /// Drops the `confirmation_tokens` table.
+        /// - Parameter database: The database connection to revert the migration on.
+        /// - Throws: An error if the schema change fails to revert.
         func revert(on database: any Database) async throws {
             try await database.schema(for: Security.ConfirmationToken.self).delete()
         }
@@ -35,6 +45,9 @@ extension Security {
 }
 
 extension Security.ConfirmationToken {
+    /// Stable, versioned column-name namespace for ``Security/ConfirmationToken`` as of
+    /// this migration (2023-03-16). Keeps the database column names fixed even if the
+    /// Swift properties on the model are later renamed.
     enum V20230316 {
         static let schemaName = "confirmation_tokens"
         static let spaceName = "security"

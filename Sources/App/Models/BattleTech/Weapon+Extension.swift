@@ -1,7 +1,17 @@
+/// Helper methods used by the CSV data importer to create/update ``BattleTech/Weapon``
+/// records and their related tech-base, tech-level, rule, and alias associations.
 import Fluent
 import Vapor
 
 extension BattleTech.Weapon {
+    /// Finds an existing weapon record matching the CSV row, or creates a new one, then
+    /// overwrites it with the row's data and persists it.
+    ///
+    /// - Parameters:
+    ///   - csvRow: The parsed weapon CSV row to import.
+    ///   - database: The database connection to query and save through.
+    /// - Returns: The found-or-created, now up-to-date ``BattleTech/Weapon`` record.
+    /// - Throws: Rethrows any Fluent query/save errors encountered while matching or updating.
     static func findOrCreate(csvRow: Importers.WeaponCSVRow, on database: Database) async throws
     -> BattleTech.Weapon {
         var weapon: BattleTech.Weapon? = BattleTech.Weapon()
@@ -25,6 +35,17 @@ extension BattleTech.Weapon {
         return weapon!
     }
 
+    /// Looks up a weapon record whose name matches exactly, or whose name matches one of the
+    /// given aliases, while also matching on tech rating, tonnage, tech level, and tech base
+    /// (resolving/creating those lookup records as needed).
+    ///
+    /// - Parameters:
+    ///   - name: The weapon name to match exactly.
+    ///   - aliases: Alternate names to match against if an exact name match isn't found.
+    ///   - csvRow: The CSV row supplying the tech rating, tonnage, tech level, and tech base to match on.
+    ///   - database: The database connection to query through.
+    /// - Returns: The matching ``BattleTech/Weapon`` record, or `nil` if none matches.
+    /// - Throws: Rethrows any Fluent query errors encountered while resolving lookups or matching.
     static func findByNameOrAliases(
         name: String,
         aliases: [String],
@@ -65,6 +86,12 @@ extension BattleTech.Weapon {
         return nil
     }
 
+    /// Resolves (or creates) the named tech base and sets this weapon's foreign key to it.
+    ///
+    /// - Parameters:
+    ///   - techBase: Name of the tech base (e.g. Inner Sphere, Clan) to attach.
+    ///   - database: The database connection to query and save through.
+    /// - Throws: Rethrows any Fluent query/save errors from ``BattleTech/TechBase/findOrCreate(tentativeTechBase:with:)``.
     func attachTechBase(techBase: String, on database: Database) async throws {
         let record = try await BattleTech.TechBase.findOrCreate(
             tentativeTechBase: techBase,
@@ -74,6 +101,12 @@ extension BattleTech.Weapon {
         self.$techBase.id = record.id!
     }
 
+    /// Resolves (or creates) the named tech level and sets this weapon's foreign key to it.
+    ///
+    /// - Parameters:
+    ///   - techLevel: Name of the tech level to attach.
+    ///   - database: The database connection to query and save through.
+    /// - Throws: Rethrows any Fluent query/save errors from ``BattleTech/TechLevel/findOrCreate(tentativeTechLevel:with:)``.
     func attachTechLevel(techLevel: String, on database: Database) async throws {
         let record = try await BattleTech.TechLevel.findOrCreate(
             tentativeTechLevel: techLevel,
@@ -83,6 +116,13 @@ extension BattleTech.Weapon {
         self.$techLevelStatic.id = record.id!
     }
 
+    /// Resolves (or creates) each named rule and attaches it to this weapon via the
+    /// many-to-many rules relationship, skipping any that are already attached.
+    ///
+    /// - Parameters:
+    ///   - rules: Names of the rules to attach.
+    ///   - database: The database connection to query and save through.
+    /// - Throws: Rethrows any Fluent query errors from ``BattleTech/Rule/findOrCreate(tentativeRules:with:)``.
     func attachRules(rules: [String], on database: Database) async throws {
         let records = try await BattleTech.Rule.findOrCreate(
             tentativeRules: rules,
@@ -99,6 +139,13 @@ extension BattleTech.Weapon {
         }
     }
 
+    /// Resolves (or creates) each named alias and links it to this weapon record so the
+    /// alternate name can be used to find this weapon again in future imports.
+    ///
+    /// - Parameters:
+    ///   - aliases: Alternate names to attach to this weapon.
+    ///   - database: The database connection to query and save through.
+    /// - Throws: Rethrows any Fluent query errors from ``BattleTech/WeaponAlias/findOrCreate(tentativeAliases:with:)``.
     func attachAliases(aliases: [String], on database: Database) async throws {
         let records = try await BattleTech.WeaponAlias.findOrCreate(
             tentativeAliases: aliases,
@@ -118,6 +165,13 @@ extension BattleTech.Weapon {
 
     }
 
+    /// Overwrites this weapon's scalar fields from the CSV row, saves it, then attaches its
+    /// tech base, tech level, rules, and aliases.
+    ///
+    /// - Parameters:
+    ///   - csvRow: The parsed weapon CSV row supplying the new field values.
+    ///   - database: The database connection to save and attach related records through.
+    /// - Throws: Rethrows any Fluent save error from persisting this record.
     func updateFromCSVRow(csvRow: Importers.WeaponCSVRow, on database: Database) async throws {
         self.name = csvRow.name()
         self.techRating = csvRow.techRating()

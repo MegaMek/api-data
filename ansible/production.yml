@@ -10,7 +10,7 @@
     proxy_server_url: "localhost:8080"
     cert_name: "quartermaster-command.services"
     docker_image: "main"
-    docker_url: registry.tapenvy.us:443/open-source/megamek/mul-api/{{ docker_image }}:latest
+    docker_url: "ghcr.io/megamek/api-data:{{ docker_image }}"
     username: "{{ lookup('file', './templates/username') }}"
     password: "{{ lookup('file', './templates/password') }}"
     database_host: "{{ lookup('file', './templates/database_host') }}"
@@ -43,7 +43,7 @@
 
     - name: Log into private registry and force re-authorization
       community.docker.docker_login:
-        registry_url: registry.tapenvy.us:443
+        registry_url: ghcr.io
         username: "{{ username }}"
         password: "{{ password }}"
         reauthorize: true
@@ -80,12 +80,12 @@
 
     - name: Log out of Registry
       community.docker.docker_login:
-        registry_url: registry.tapenvy.us:443
+        registry_url: ghcr.io
         state: absent
 
     - name: Copy Nginx conf
       ansible.builtin.template:
-        src: templates/mm-api.j2
+        src: templates/nginx.j2
         dest: /etc/nginx/sites-available/mm-api
         mode: "0400"
       become: true
@@ -96,7 +96,7 @@
         dest: /etc/nginx/sites-enabled/mm-api
         state: link
       become: true
-      notify: reload nginx
+      notify: Reload nginx
 
   handlers:
     - name: Reload nginx
