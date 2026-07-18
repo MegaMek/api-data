@@ -5,85 +5,89 @@
 //
 
 import Fluent
-import XCTVapor
+import Testing
+import VaporTesting
 
 @testable import App
 
-final class MunitionTypesControllerTests: XCTestCase {
-    var path = "/battletech/munition-types"
-    var app: Application!
+@Suite(.serialized, .databaseSerialized)
+struct MunitionTypesControllerTests {
+    let path = "/battletech/munition-types"
 
-    override func setUp() async throws {
-        self.app = try await Application.make(.testing)
-        try await configure(app)
-        try await app.autoMigrate()
+    @Test
+    func index() async throws {
+        try await withTestApp { app in
+            _ = try await BattleTech.MunitionType.create(on: app.db)
+            let munitionTypeCount = try await BattleTech.MunitionType.query(on: app.db).count()
+
+            try await app.test(
+                .GET, path,
+                loggedInRequest: false,
+                afterResponse: { response in
+                    let munitionTypes = try response.content.decode([BattleTech.MunitionType].self)
+                    #expect(munitionTypes.count == munitionTypeCount)
+                })
+        }
     }
 
-    override func tearDown() async throws {
-        try await app.autoRevert()
-        try await self.app.asyncShutdown()
-        self.app = nil
+    @Test
+    func show() async throws {
+        try await withTestApp { app in
+            let munitionType = try await BattleTech.MunitionType.create(on: app.db)
+            let showPath = "\(path)/\(munitionType.id!)"
+
+            try await app.test(
+                .GET, showPath,
+                loggedInRequest: false,
+                afterResponse: { response in
+                    let returnedMunitionType = try response.content.decode(BattleTech.MunitionType.self)
+                    #expect(munitionType.name == returnedMunitionType.name)
+                })
+        }
     }
 
-    func testIndex() async throws {
-        _ = try await BattleTech.MunitionType.create(on: app.db)
-        let munitionTypeCount = try await BattleTech.MunitionType.query(on: app.db).count()
+    @Test
+    func showNotFound() async throws {
+        try await withTestApp { app in
+            let notFoundPath = "\(path)/NOT-A-UUID"
 
-        try app.test(
-            .GET, path,
-            loggedInRequest: false,
-            afterResponse: { response in
-                let munitionTypes = try response.content.decode([BattleTech.MunitionType].self)
-                XCTAssertEqual(munitionTypes.count, munitionTypeCount)
-            })
+            try await app.test(
+                .GET, notFoundPath,
+                loggedInRequest: false,
+                afterResponse: { response in
+                    #expect(response.status == .notFound)
+                })
+        }
     }
 
-    func testShow() async throws {
-        let munitionType = try await BattleTech.MunitionType.create(on: app.db)
-        let showPath = "\(path)/\(munitionType.id!)"
+    @Test
+    func delete() async throws {
+        try await withTestApp { app in
+            let munitionType = try await BattleTech.MunitionType.create(on: app.db)
+            let showPath = "\(path)/\(munitionType.id!)"
 
-        try app.test(
-            .GET, showPath,
-            loggedInRequest: false,
-            afterResponse: { response in
-                let returnedMunitionType = try response.content.decode(BattleTech.MunitionType.self)
-                XCTAssertEqual(munitionType.name, returnedMunitionType.name)
-            })
+            try await app.test(
+                .DELETE, showPath,
+                loggedInRequest: false,
+                afterResponse: { response in
+                    #expect(response.status == .noContent)
+                })
+        }
     }
 
-    func testShowNotFound() async throws {
-        let notFoundPath = "\(path)/NOT-A-UUID"
+    @Test
+    func ammo() async throws {
+        try await withTestApp { app in
+            let ammo = try await BattleTech.Ammo.create(on: app.db)
+            let showPath = "\(path)/\(ammo.$munitionType.id)/ammo"
 
-        try app.test(
-            .GET, notFoundPath,
-            loggedInRequest: false,
-            afterResponse: { response in
-                XCTAssertEqual(response.status, .notFound)
-            })
-    }
-
-    func testDelete() async throws {
-        let munitionType = try await BattleTech.MunitionType.create(on: app.db)
-        let showPath = "\(path)/\(munitionType.id!)"
-
-        try app.test(
-            .DELETE, showPath,
-            loggedInRequest: false,
-            afterResponse: { response in
-                XCTAssertEqual(response.status, .noContent)
-            })
-    }
-
-    func testAmmo() async throws {
-        let ammo = try await BattleTech.Ammo.create(on: app.db)
-        let showPath = "\(path)/\(ammo.$munitionType.id)/ammo"
-
-        try app.test(
-            .GET, showPath,
-            loggedInRequest: false,
-            afterResponse: { response in
-                let returnedAmmo = try response.content.decode(Page<BattleTech.Ammo>.self)
-                XCTAssertEqual(1, returnedAmmo.metadata.total)
-            })
+            try await app.test(
+                .GET, showPath,
+                loggedInRequest: false,
+                afterResponse: { response in
+                    let returnedAmmo = try response.content.decode(Page<BattleTech.Ammo>.self)
+                    #expect(1 == returnedAmmo.metadata.total)
+                })
+        }
     }
 }

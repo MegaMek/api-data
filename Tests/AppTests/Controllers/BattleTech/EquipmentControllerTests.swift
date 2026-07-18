@@ -5,91 +5,95 @@
 //
 
 import Fluent
-import XCTVapor
+import Testing
+import VaporTesting
 
 @testable import App
 
-final class EquipmentControllerTests: XCTestCase {
-    var app: Application!
-    var path = "/battletech/equipment"
+@Suite(.serialized, .databaseSerialized)
+struct EquipmentControllerTests {
+    let path = "/battletech/equipment"
 
-    override func setUp() async throws {
-        self.app = try await Application.make(.testing)
-        try await configure(app)
-        try await app.autoMigrate()
+    @Test
+    func index() async throws {
+        try await withTestApp { app in
+            _ = try await BattleTech.Equipment.create(on: app.db)
+            let equipmentCount = try await BattleTech.Equipment.query(on: app.db).count()
+
+            try await app.test(
+                .GET, path,
+                loggedInRequest: false,
+                afterResponse: { response in
+                    let equipment = try response.content.decode(Page<BattleTech.Equipment>.self)
+                    #expect(equipment.metadata.total == equipmentCount)
+                })
+        }
     }
 
-    override func tearDown() async throws {
-        try await app.autoRevert()
-        try await self.app.asyncShutdown()
-        self.app = nil
+    @Test
+    func show() async throws {
+        try await withTestApp { app in
+            let equipment = try await BattleTech.Equipment.create(on: app.db)
+            let showPath = "\(path)/\(equipment.id!)"
+
+            try await app.test(
+                .GET, showPath,
+                loggedInRequest: false,
+                afterResponse: { response in
+                    let returnedEquipment = try response.content.decode(BattleTech.Equipment.self)
+                    #expect(equipment.name == returnedEquipment.name)
+                })
+        }
     }
 
-    func testIndex() async throws {
-        _ = try await BattleTech.Equipment.create(on: app.db)
-        let equipmentCount = try await BattleTech.Equipment.query(on: app.db).count()
+    @Test
+    func showNotFound() async throws {
+        try await withTestApp { app in
+            let notFoundPath = "\(path)/NOT-A-UUID"
 
-        try app.test(
-            .GET, path,
-            loggedInRequest: false,
-            afterResponse: { response in
-                let equipment = try response.content.decode(Page<BattleTech.Equipment>.self)
-                XCTAssertEqual(equipment.metadata.total, equipmentCount)
-            })
+            try await app.test(
+                .GET, notFoundPath,
+                loggedInRequest: false,
+                afterResponse: { response in
+                    #expect(response.status == .notFound)
+                })
+        }
     }
 
-    func testShow() async throws {
-        let equipment = try await BattleTech.Equipment.create(on: app.db)
-        let showPath = "\(path)/\(equipment.id!)"
+    @Test
+    func delete() async throws {
+        try await withTestApp { app in
+            let equipment = try await BattleTech.Equipment.create(on: app.db)
+            let showPath = "\(path)/\(equipment.id!)"
 
-        try app.test(
-            .GET, showPath,
-            loggedInRequest: false,
-            afterResponse: { response in
-                let returnedEquipment = try response.content.decode(BattleTech.Equipment.self)
-                XCTAssertEqual(equipment.name, returnedEquipment.name)
-            })
+            try await app.test(
+                .DELETE, showPath,
+                loggedInRequest: false,
+                afterResponse: { response in
+                    #expect(response.status == .noContent)
+                })
+        }
     }
 
-    func testShowNotFound() async throws {
-        let notFoundPath = "\(path)/NOT-A-UUID"
+    @Test
+    func `import`() async throws {
+        try await withTestApp { app in
+            let testFileByteBuffer = try await TestResources.buffer(for: "BattleTech/misc.csv")
+            let equipmentMassImport = EquipmentMassImport(
+                file: File(data: testFileByteBuffer, filename: "misc.csv"))
 
-        try app.test(
-            .GET, notFoundPath,
-            loggedInRequest: false,
-            afterResponse: { response in
-                XCTAssertEqual(response.status, .notFound)
-            })
-    }
+            let massImportPath = "\(path)/import"
 
-    func testDelete() async throws {
-        let equipment = try await BattleTech.Equipment.create(on: app.db)
-        let showPath = "\(path)/\(equipment.id!)"
-
-        try app.test(
-            .DELETE, showPath,
-            loggedInRequest: false,
-            afterResponse: { response in
-                XCTAssertEqual(response.status, .noContent)
-            })
-    }
-
-    func testImport() async throws {
-        let testFileByteBuffer = try await TestResources.buffer(for: "BattleTech/misc.csv")
-        let equipmentMassImport = EquipmentMassImport(
-            file: File(data: testFileByteBuffer, filename: "misc.csv"))
-
-        let massImportPath = "\(path)/import"
-
-        try app.test(
-            .POST, massImportPath,
-            loggedInRequest: false,
-            beforeRequest: { request in
-                try request.content.encode(equipmentMassImport)
-            },
-            afterResponse: { response in
-                XCTAssertEqual(response.status, .created)
-                XCTAssertNotNil(app.queues.queue.pop())
-            })
+            try await app.test(
+                .POST, massImportPath,
+                loggedInRequest: false,
+                beforeRequest: { request in
+                    try request.content.encode(equipmentMassImport)
+                },
+                afterResponse: { response in
+                    #expect(response.status == .created)
+                    #expect(app.queues.queue.pop() != nil)
+                })
+        }
     }
 }

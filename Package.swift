@@ -37,7 +37,7 @@ let package = Package(
       name: "AppTests",
       dependencies: [
         .target(name: "App"),
-        .product(name: "XCTVapor", package: "vapor"),
+        .product(name: "VaporTesting", package: "vapor"),
         .product(name: "_NIOFileSystem", package: "swift-nio"),
       ]),
   ]

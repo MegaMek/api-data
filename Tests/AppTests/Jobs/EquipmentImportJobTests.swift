@@ -6,46 +6,40 @@
 
 import Fluent
 import Queues
-import XCTVapor
+import Testing
+import VaporTesting
 
 @testable import App
 
-final class EquipmentImportJobTests: XCTestCase {
-    var app: Application!
-
-    override func setUp() async throws {
-        self.app = try await Application.make(.testing)
-        try await configure(app)
-        try await app.autoMigrate()
+@Suite(.serialized, .databaseSerialized)
+struct EquipmentImportJobTests {
+    @Test
+    func equipmentJob() async throws {
+        try await withTestApp { app in
+            let job = EquipmentImportJob()
+            let context = QueueContext(
+                queueName: .init(string: "test"), configuration: .init(), application: app,
+                logger: app.logger, on: app.eventLoopGroup.any())
+            let csvRow = Importers.EquipmentCSVRow(row: data())
+            try await job.dequeue(context, csvRow)
+            let count = try await BattleTech.Equipment.query(on: app.db).count()
+            #expect(count == 1)
+        }
     }
 
-    override func tearDown() async throws {
-        try await app.autoRevert()
-        try await self.app.asyncShutdown()
-        self.app = nil
-    }
-
-    func testEquipmentJob() async throws {
-        let job = EquipmentImportJob()
-        let context = QueueContext(
-            queueName: .init(string: "test"), configuration: .init(), application: app,
-            logger: app.logger, on: app.eventLoopGroup.any())
-        let csvRow = Importers.EquipmentCSVRow(row: data())
-        try await job.dequeue(context, csvRow)
-        let count = try await BattleTech.Equipment.query(on: app.db).count()
-        XCTAssertEqual(count, 1)
-    }
-
-    func testEquipmentJobDuplicateRun() async throws {
-        let job = EquipmentImportJob()
-        let context = QueueContext(
-            queueName: .init(string: "test"), configuration: .init(), application: app,
-            logger: app.logger, on: app.eventLoopGroup.any())
-        let csvRow = Importers.EquipmentCSVRow(row: data())
-        try await job.dequeue(context, csvRow)
-        try await job.dequeue(context, csvRow)
-        let count = try await BattleTech.Equipment.query(on: app.db).count()
-        XCTAssertEqual(count, 1)
+    @Test
+    func equipmentJobDuplicateRun() async throws {
+        try await withTestApp { app in
+            let job = EquipmentImportJob()
+            let context = QueueContext(
+                queueName: .init(string: "test"), configuration: .init(), application: app,
+                logger: app.logger, on: app.eventLoopGroup.any())
+            let csvRow = Importers.EquipmentCSVRow(row: data())
+            try await job.dequeue(context, csvRow)
+            try await job.dequeue(context, csvRow)
+            let count = try await BattleTech.Equipment.query(on: app.db).count()
+            #expect(count == 1)
+        }
     }
 
     private func data() -> [String] {
