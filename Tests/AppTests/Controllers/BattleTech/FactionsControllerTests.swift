@@ -77,16 +77,9 @@ final class FactionsControllerTests: XCTestCase {
     func testImport() async throws {
         let factionCount = try await BattleTech.Faction.query(on: app.db).count()
 
-        let (testFileHandle, testFileRegion) = try await app.fileio.openFile(
-            path: "Tests/Resources/BattleTech/factions.xml",
-            eventLoop: app.eventLoopGroup.next()
-        ).get()
-
-        let testFileByteBuffer = try await app.fileio.read(
-            fileRegion: testFileRegion, allocator: .init())
+        let testFileByteBuffer = try await TestResources.buffer(for: "BattleTech/factions.xml")
         let factionMassImport = FactionMassImport(
             file: File(data: testFileByteBuffer, filename: "factions.xml"))
-        try testFileHandle.close()
 
         let massImportPath = "\(path)/import"
 
@@ -105,16 +98,9 @@ final class FactionsControllerTests: XCTestCase {
     }
 
     func testDuplicateImport() async throws {
-        let (testFileHandle, testFileRegion) = try await app.fileio.openFile(
-            path: "Tests/Resources/BattleTech/factions.xml",
-            eventLoop: app.eventLoopGroup.next()
-        ).get()
-
-        let testFileByteBuffer = try await app.fileio.read(
-            fileRegion: testFileRegion, allocator: .init())
+        let testFileByteBuffer = try await TestResources.buffer(for: "BattleTech/factions.xml")
         let factionMassImport = FactionMassImport(
             file: File(data: testFileByteBuffer, filename: "factions.xml"))
-        try testFileHandle.close()
 
         let massImportPath = "\(path)/import"
 

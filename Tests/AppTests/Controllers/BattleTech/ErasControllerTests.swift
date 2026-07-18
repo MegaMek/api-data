@@ -78,16 +78,9 @@ final class ErasControllerTests: XCTestCase {
     func testImport() async throws {
         let eraCount = try await BattleTech.Era.query(on: app.db).count()
 
-        let (testFileHandle, testFileRegion) = try await app.fileio.openFile(
-            path: "Tests/Resources/BattleTech/eras.xml",
-            eventLoop: app.eventLoopGroup.next()
-        ).get()
-
-        let testFileByteBuffer = try await app.fileio.read(
-            fileRegion: testFileRegion, allocator: .init())
+        let testFileByteBuffer = try await TestResources.buffer(for: "BattleTech/eras.xml")
         let eraMassImport = EraMassImport(
             file: File(data: testFileByteBuffer, filename: "eras.xml"))
-        try testFileHandle.close()
 
         let massImportPath = "\(path)/import"
 
@@ -106,16 +99,9 @@ final class ErasControllerTests: XCTestCase {
     }
 
     func testDuplicateImport() async throws {
-        let (testFileHandle, testFileRegion) = try await app.fileio.openFile(
-            path: "Tests/Resources/BattleTech/eras.xml",
-            eventLoop: app.eventLoopGroup.next()
-        ).get()
-
-        let testFileByteBuffer = try await app.fileio.read(
-            fileRegion: testFileRegion, allocator: .init())
+        let testFileByteBuffer = try await TestResources.buffer(for: "BattleTech/eras.xml")
         let eraMassImport = EraMassImport(
             file: File(data: testFileByteBuffer, filename: "eras.xml"))
-        try testFileHandle.close()
 
         let massImportPath = "\(path)/import"
 

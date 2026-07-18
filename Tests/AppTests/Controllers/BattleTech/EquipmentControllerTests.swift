@@ -75,16 +75,9 @@ final class EquipmentControllerTests: XCTestCase {
     }
 
     func testImport() async throws {
-        let (testFileHandle, testFileRegion) = try await app.fileio.openFile(
-            path: "Tests/Resources/BattleTech/misc.csv",
-            eventLoop: app.eventLoopGroup.next()
-        ).get()
-
-        let testFileByteBuffer = try await app.fileio.read(
-            fileRegion: testFileRegion, allocator: .init())
+        let testFileByteBuffer = try await TestResources.buffer(for: "BattleTech/misc.csv")
         let equipmentMassImport = EquipmentMassImport(
             file: File(data: testFileByteBuffer, filename: "misc.csv"))
-        try testFileHandle.close()
 
         let massImportPath = "\(path)/import"
 

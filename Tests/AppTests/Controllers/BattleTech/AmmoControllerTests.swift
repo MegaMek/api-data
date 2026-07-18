@@ -75,16 +75,9 @@ final class AmmoControllerTests: XCTestCase {
     }
 
     func testImport() async throws {
-        let (testFileHandle, testFileRegion) = try await app.fileio.openFile(
-            path: "Tests/Resources/BattleTech/ammo.csv",
-            eventLoop: app.eventLoopGroup.next()
-        ).get()
-
-        let testFileByteBuffer = try await app.fileio.read(
-            fileRegion: testFileRegion, allocator: .init())
+        let testFileByteBuffer = try await TestResources.buffer(for: "BattleTech/ammo.csv")
         let ammoMassImport = AmmoMassImport(
             file: File(data: testFileByteBuffer, filename: "ammo.csv"))
-        try testFileHandle.close()
 
         let massImportPath = "\(path)/import"
 
