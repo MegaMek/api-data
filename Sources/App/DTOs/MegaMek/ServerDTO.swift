@@ -9,7 +9,7 @@ extension MegaMek {
     struct ServerDTO : Codable {
         var port: Int
         var version: String
-        var phase: Bool?
+        var phase: String?
         var passworded: Bool?
         var users: [String]
         var motd: String?
